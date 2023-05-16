@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting #-}
 
-module EqfocusDisj where
+module Eqfocus where
 
 open import Data.List renaming (map to mapList; zip to zipList)
 open import Data.List.Relation.Unary.All renaming (map to mapAll)
@@ -15,9 +15,9 @@ open import Relation.Binary.PropositionalEquality hiding (_≗_; [_])
 open import Data.Bool hiding (_∧_; _∨_)
 
 open import Utilities
-open import FormulaeDisj 
-open import SeqCalcDisj
-open import FocusingDisj
+open import Formulae 
+open import SeqCalc
+open import Focusing
 
 pass'-li : {Γ : Cxt} {A : Fma}
  → Σ Pos (λ C → just A ∣ Γ ⊢li C) 
