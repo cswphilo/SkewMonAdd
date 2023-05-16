@@ -206,7 +206,7 @@ check-focus-all-∧l₂ {A = A} f ((C , f') ∷ fs) rewrite check-focus-all-∧l
           check-focus-all-∧l₂ {A = A'} f' fs |
           p2li-f2p-∧l₂-fs-eq {A = A'} fs = refl
 
--- equivalent derivations in SeqCalc are identical in Focused
+-- equivalent derivations in SeqCalc are identical in Focused calculus
 eqfocus :{S : Stp} {Γ : Cxt} {C : Fma}
   → {f f' : S ∣ Γ ⊢ C}
   → f ≗ f'

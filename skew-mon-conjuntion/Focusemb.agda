@@ -288,7 +288,10 @@ check-focus-ok (f2pT (∧l₂T f)) ((.R , C , f2pT (∧l₂T f₁)) ∷ fs) ok |
 check-focus-ok (f2pT (∧l₂T f)) ((.R , C , f2pT (∧l₂T f₁)) ∷ fs) ok | inj₂ ((.R , C , f2pT (∧l₂T f₂)) ∷ fs' , refl , ok₁) | eq1 , eq2 | refl | refl rewrite check-focus-ok (f2pT (∧l₂T f₂)) fs' ok₁ | isOKR-refl (mapList proj₁ fs) ok ok₁ = refl
 
 
--- `focused derivations are in normal form
+{-
+focused derivations are in normal form, 
+i.e. running the noralization algorithm would produce the same result 
+-}
 mutual
   focusemb-∧rT* : {l : List Tag} {S : Irr} {Γ : Cxt} {A : Fma}
     → {Φ : List Fma} 

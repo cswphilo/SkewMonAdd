@@ -28,6 +28,7 @@ data Tag : Set where
   R : Tag
   P : Tag
 
+-- functions checking validity of a list of tags
 isOKL : List Tag → Set
 isOKL (R ∷ l) = ⊤
 isOKL (E ∷ l) = ⊤
@@ -47,9 +48,9 @@ isOK (L ∷ l) = isOKL l
 isOK (R ∷ l) = isOKR l
 isOK (P ∷ l) = isOK l 
 
+-- the focused calculus has four phases
 -- ri = right invertible
 data _∣_⊢ri_ : Stp → Cxt → Fma → Set
-
 data _∣_∣_⊢riT_ : (l : List Tag) → Irr → Cxt → Fma → Set
 
 -- l = left phase 
@@ -152,21 +153,7 @@ data _∣_∣_⊢fT_ where
         --------------------------------
              R ∣ (just (A ∧ B) , _) ∣ Γ ⊢fT C
 
-
--- Tests for the focused calculus
-
--- test : {X Y Z : At} → just (` X ∧ ` Y) ∣ ` Z ∷ [] ⊢ri (` X ∧ ` Y) ⊗ ` Z
--- test = li2ri (p2li (f2p (⊗r _ _ (∧rT {Γ = []} (p2riT (f2pTL (∧l₁T (p2li (f2p ax))))) (p2riT (f2pTR (∧l₂T (p2li (f2p ax)))))) (li2ri (p2li (pass (p2li (f2p ax))))))))
-
--- sym-test : {X Y Z : At} → just (` X ∧ ` Y) ∣ ` Z ∷ [] ⊢ri (` Y ∧ ` X) ⊗ ` Z
--- sym-test = li2ri (p2li (f2p (⊗r (R ∷ L ∷ []) tt (∧rT {Γ = []} (p2riT (f2pTR (∧l₂T (p2li (f2p ax))))) (p2riT (f2pTL (∧l₁T (p2li (f2p ax)))))) (li2ri (p2li (pass (p2li (f2p ax))))))))
-
--- test' : {X Y Z : At} → just (` X ∧ ` Y) ∣ ` Z ∷ [] ⊢ri ` X ⊗ ` Z
--- test' = li2ri (p2li (f2p (⊗r {!   !} {!   !} (p2riT (f2pT (∧l₁T (p2li (f2p ax))))) ((li2ri (p2li (pass (p2li (f2p ax)))))))))
-
-
--- Tests for the focused calculus
-
+-- decomposing ∧ in a formula A
 data SubFmas : List Fma → Fma → Set where
   conj : {Φ Ψ : List Fma} {A A' B B' : Fma} → 
       SubFmas (A' ∷ Φ) A → SubFmas (B' ∷ Ψ) B → 
@@ -186,7 +173,7 @@ SubFmas∧ {[]} {[]} stop refl = conj stop stop
 SubFmas∧ {x ∷ Φ} {[]} stop eq = ⊥-elim ([]disj∷ Φ (proj₂ (inj∷ eq)))
 SubFmas∧ {x ∷ Φ} {x₁ ∷ Ψ} stop eq = ⊥-elim ([]disj∷ Φ (proj₂ (inj∷ eq)))
 
--- A lemma helps to prove ∧rT*
+-- a lemma helps to prove ∧rT*
 fsDist : {S : Irr} {Γ : Cxt} {A B : Fma}
   → (Φ Ψ : List Fma) (fs : List (Σ Tag (λ t₁ → Σ (Σ Fma isPos) (_∣_∣_⊢pT_ t₁ S Γ)))) (eq : A ∷ Φ ++ B ∷ Ψ ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs)
   → Σ (List (Σ Tag (λ t₁ → Σ (Σ Fma isPos) (_∣_∣_⊢pT_ t₁ S Γ)))) (λ fs' → Σ (List (Σ Tag (λ t₁ → Σ (Σ Fma isPos) (_∣_∣_⊢pT_ t₁ S Γ)))) (λ fs'' 
@@ -197,6 +184,7 @@ fsDist [] (x₁ ∷ Ψ) (x ∷ fs) eq with fsDist [] Ψ fs (proj₂ (inj∷ eq))
 fsDist (x₁ ∷ Φ) Ψ (x ∷ fs) eq with fsDist Φ Ψ fs (proj₂ (inj∷ eq))
 ... | x₂ ∷ fs' , x₃ ∷ fs'' , refl , refl , refl = x ∷ x₂ ∷ fs' , x₃ ∷ fs'' , refl , cong (λ x → x ∷ proj₁ (proj₁ (proj₂ x₂)) ∷ mapList (λ x₄ → proj₁ (proj₁ (proj₂ x₄))) fs') (proj₁ (inj∷ eq)) , refl
 
+-- several ∧rT in one step
 ∧rT* : {l : List Tag} {S : Irr} {Γ : Cxt} {A : Fma}
   → {Φ : List Fma}
   → (fs : List (Σ Tag (λ t → Σ (Σ Fma isPos) (_∣_∣_⊢pT_ t S Γ))))
@@ -208,6 +196,7 @@ fsDist (x₁ ∷ Φ) Ψ (x ∷ fs) eq with fsDist Φ Ψ fs (proj₂ (inj∷ eq))
 ... | (t , .C , .f) ∷ fs' , x₁ ∷ fs'' , refl , refl , refl = ∧rT (∧rT* ((t , C , f) ∷ fs') SF refl refl) ((∧rT* (x₁ ∷ fs'') SF₁ refl refl))
 ∧rT* ((t , C , f) ∷ []) stop refl refl = p2riT f
 
+-- untag sequents in tagged focusing phase
 untagF : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
   → t ∣ S ∣ Γ ⊢fT C
   → S ∣ Γ ⊢f C
@@ -223,6 +212,7 @@ untagP : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
 untagP (passT f) = pass f
 untagP (f2pT f) = f2p (untagF f)
 
+-- rules with " ' " are rules applying to a list of derivations
 untagP' :  {S : Irr} {Γ : Cxt}
   → Σ Tag (λ t → Σ Pos (λ C → t ∣ S ∣ Γ ⊢pT C)) 
   → Σ Pos (λ C → S ∣ Γ ⊢p C)
@@ -237,46 +227,6 @@ passT' : {Γ : Cxt} {A : Fma}
  → Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ) 
  → Σ Tag (λ t → Σ (Σ Fma isPos) (_∣_∣_⊢pT_ t (- , tt) (A ∷ Γ)))
 passT' (C , f) = P , (C , (passT f))
-
--- give-tag : {S : Irr} {Γ : Cxt} {C : Pos}
---   → (f : S ∣ Γ ⊢f C)
---   → Tag
--- give-tag ax = E
--- give-tag Ir = E
--- give-tag (⊗r l ok refl f g) = E
--- give-tag (∧l₁ f) = L
--- give-tag (∧l₂ f) = R
-
--- tag-seq : {S : Irr} {Γ : Cxt} {C : Pos}
---   → (f : S ∣ Γ ⊢f C)
---   → (give-tag f) ∣ S ∣ Γ ⊢fT C
--- tag-seq ax = ax
--- tag-seq Ir = Ir
--- tag-seq (⊗r l ok refl f g) = ⊗rT l ok refl f g
--- tag-seq (∧l₁ f) = ∧l₁T f
--- tag-seq (∧l₂ f) = ∧l₂T f
-
--- tag-seq-eq : {S : Irr} {Γ : Cxt} {C : Pos}
---   → (f : S ∣ Γ ⊢f C)
---   → f ≡ untagF (tag-seq f)
--- tag-seq-eq ax = refl
--- tag-seq-eq Ir = refl
--- tag-seq-eq (⊗r l ok refl f g) = refl
--- tag-seq-eq (∧l₁ f) = refl
--- tag-seq-eq (∧l₂ f) = refl
-
--- give-tag-empty : {Γ : Cxt} {C : Pos}
---   → (f : (- , tt) ∣ Γ ⊢f C)
---   → E ≡ give-tag f
--- give-tag-empty Ir = refl
--- give-tag-empty (⊗r l ok refl f g) = refl
-
--- give-tag-At : {X : At} {Γ : Cxt} {C : Pos}
---   → (f : (just (` X) , tt) ∣ Γ ⊢f C)
---   → (eq : Γ ≡ [])
---   → E ≡ give-tag f
--- give-tag-At ax refl = refl
--- give-tag-At (⊗r l {Γ = []} ok refl f g) refl = refl
 
 p2li' : {S : Irr} {Γ : Cxt}
   → Σ Pos (λ C → S ∣ Γ ⊢p C) 
@@ -402,6 +352,12 @@ p2li-untagP-fs-eq [] = refl
 p2li-untagP-fs-eq (x ∷ fs) = cong₂ _∷_ refl (p2li-untagP-fs-eq fs)
 {-# REWRITE p2li-untagP-fs-eq #-}
 
+{- check the shape of a list of derivations,
+there are three possibilities:
+i) all end with pass 
+ii) all end with ∧lᵢ
+iii) none of the above
+-}
 check-focus : {S : Irr} {Γ : Cxt}
   → (f : Σ Pos (λ C → irr S ∣ Γ ⊢li C))
   → (fs : List (Σ Pos (λ C → irr S ∣ Γ ⊢li C)))
@@ -465,6 +421,7 @@ check-focus (C , p2li (f2p (∧l₂ f))) (f' ∷ fs) | inj₂ ((.E , .(A ⊗ B ,
 ... | inj₂ ((.R , C' , f2pT (∧l₂T f₁)) ∷ fs' , refl , ok) = 
   inj₂ (((R , (C , (f2pT (∧l₂T f)))) ∷ (R , C' , f2pT (∧l₂T f₁)) ∷ fs') , (refl , ok))
 
+-- generalized ⊗r rule
 gen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
   → (f : S ∣ Γ ⊢li C)
   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
@@ -529,7 +486,7 @@ fsDist-white [] (x₁ ∷ Ψ) (x ∷ fs) eq with fsDist-white [] Ψ fs (proj₂ 
 fsDist-white (x₁ ∷ Φ) Ψ (x ∷ fs) eq with fsDist-white Φ Ψ fs (proj₂ (inj∷ eq))
 ... | x₂ ∷ fs' , x₃ ∷ fs'' , refl , refl , refl = x ∷ x₂ ∷ fs' , x₃ ∷ fs'' , refl , cong (λ x → x ∷ proj₁ (proj₁ x₂) ∷ mapList (λ x₄ → proj₁ (proj₁ x₄)) fs') (proj₁ (inj∷ eq)) , refl
 
-
+-- several ∧r in one step
 ∧r* : {S : Stp} {Γ : Cxt} {A : Fma}
   → {Φ : List Fma}
   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
@@ -552,6 +509,7 @@ fsDist-white-refl S Γ {A} {B} {f} {g} ((A' , f') ∷ fs) gs
   rewrite fsDist-white-refl S Γ {A'} {B} {f'} {g} fs gs = refl
 {-# REWRITE fsDist-white-refl #-}
 
+-- phase ri is invertible
 f2fs : {S : Stp} {Γ : Cxt} {A : Fma}
   → (f : S ∣ Γ ⊢ri A)
   → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs → Σ (List Fma) (λ Φ → Σ (Φ ≡ mapList (λ x → pos (proj₁ x)) fs) (λ eq → Σ (SubFmas Φ A) (λ SF → f ≡ ∧r* fs SF eq))))
@@ -571,15 +529,7 @@ f2fs-refl {S} {Γ} .(((C , f) ∷ fs') ++ (C' , f') ∷ fs'') (conj {.(mapList (
   rewrite f2fs-refl ((C , f) ∷ fs') SF1 refl | f2fs-refl ((C' , f') ∷ fs'') SF2 refl = refl
 f2fs-refl (x ∷ []) stop refl = refl
 
-⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
-  → (f : S ∣ Γ ⊢ri A)
-  → (g : - ∣ Δ ⊢ri B)
-  → S ∣ Γ ++ Δ ⊢ri A ⊗ B
-⊗r-ri {A = A} f g with f2fs f
-... | [] , .[] , refl , () , refl
-... | (C , f₁) ∷ fs , .(mapList (λ x → proj₁ (proj₁ x)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen⊗r-li f₁ fs SF g)
-
--- admissible rules, except ⊗r-ri
+-- admissible rules
 Il-ri : {Γ : Cxt} {C : Fma}
         (f : - ∣ Γ ⊢ri C) →
     ------------------------
@@ -612,6 +562,14 @@ pass-ri (li2ri f) = li2ri (p2li (pass f))
               just (A ∧ B) ∣ Γ ⊢ri C
 ∧l₂-ri (∧r f f₁) = ∧r (∧l₂-ri f) (∧l₂-ri f₁)
 ∧l₂-ri (li2ri f) = li2ri (p2li (f2p (∧l₂ f)))
+
+⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
+  → (f : S ∣ Γ ⊢ri A)
+  → (g : - ∣ Δ ⊢ri B)
+  → S ∣ Γ ++ Δ ⊢ri A ⊗ B
+⊗r-ri {A = A} f g with f2fs f
+... | [] , .[] , refl , () , refl
+... | (C , f₁) ∷ fs , .(mapList (λ x → proj₁ (proj₁ x)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen⊗r-li f₁ fs SF g)
 
 Ir-ri : - ∣ [] ⊢ri I
 Ir-ri = li2ri (p2li (f2p Ir))

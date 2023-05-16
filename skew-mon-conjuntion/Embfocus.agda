@@ -290,7 +290,7 @@ embIl : {Γ : Cxt} {C : Fma}
 embIl (∧r f g) = ∧r (embIl f) (embIl g) ∙ ∧rIl
 embIl (li2ri f) = refl
 
--- embfocus
+-- embfocus, every derivation in SeqCalc is ≗-to the its normal form
 embfocus : {S : Stp} {Γ : Cxt} {C : Fma}
   → (f : S ∣ Γ ⊢ C)
   → emb-ri (focus f) ≗ f
