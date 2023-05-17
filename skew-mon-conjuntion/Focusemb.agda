@@ -67,71 +67,71 @@ f2fsT (∧rT f g) with f2fsT f | f2fsT g
   (s , C , f') ∷ fs ++ (t , D , g') ∷ gs , (mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((s , C , f') ∷ fs)) ++ (mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((t , D , g') ∷ gs)) , refl , refl , conj SF1 SF2 , refl
 f2fsT (f2riT {t} {C = C} f) = (t , C , f) ∷ [] , pos C ∷ [] , refl , refl , stop , refl
 
-emb-pT-untagP : {S : Irr} {Γ : Cxt}
+emb-pT-untagF : {S : Irr} {Γ : Cxt}
   → (f : Σ Tag (λ t → Σ Pos (λ C → (t ∣ S ∣ Γ ⊢fT C))))
   → Σ Pos (λ C → irr S ∣ Γ ⊢li C) 
-emb-pT-untagP (t , C , f) = C , f2li (untagF f)
+emb-pT-untagF (t , C , f) = C , f2li (untagF f)
 
-emb-pT-untagP-fs-eq : {S : Irr} {Γ : Cxt}
+emb-pT-untagF-fs-eq : {S : Irr} {Γ : Cxt}
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t S Γ))))
-  → mapList (λ x → pos (proj₁ x)) (mapList (λ x → emb-pT-untagP x) fs) ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs
-emb-pT-untagP-fs-eq [] = refl
-emb-pT-untagP-fs-eq (x ∷ fs) = refl
+  → mapList (λ x → pos (proj₁ x)) (mapList (λ x → emb-pT-untagF x) fs) ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs
+emb-pT-untagF-fs-eq [] = refl
+emb-pT-untagF-fs-eq (x ∷ fs) = refl
 
-emb-pT-f2li'-untagP'-fs-eq : {S : Irr} {Γ : Cxt}
+emb-pT-f2li'-untagF'-fs-eq : {S : Irr} {Γ : Cxt}
   → (fs : List (Σ Tag (λ t → Σ (Σ Fma isPos) (_∣_∣_⊢fT_ t S Γ))))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → f2li' (untagF' x)) fs
-emb-pT-f2li'-untagP'-fs-eq [] = refl
-emb-pT-f2li'-untagP'-fs-eq (x ∷ fs) = refl
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → f2li' (untagF' x)) fs
+emb-pT-f2li'-untagF'-fs-eq [] = refl
+emb-pT-f2li'-untagF'-fs-eq (x ∷ fs) = refl
 
-emb-pT-untagP-pass : {Γ : Cxt} {A : Fma}
+emb-pT-untagF-pass : {Γ : Cxt} {A : Fma}
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t (- , tt) (A ∷ Γ)))))
   → (fs' : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs'
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs'
   → fs ≡ mapList (λ x → passT' x) fs'
-emb-pT-untagP-pass [] [] refl = refl
-emb-pT-untagP-pass ((.P , C , passT f) ∷ fs) ((C' , f') ∷ fs') eq with inj∷ eq
-... | refl , eq1 = cong₂ _∷_ refl (emb-pT-untagP-pass fs fs' eq1)
+emb-pT-untagF-pass [] [] refl = refl
+emb-pT-untagF-pass ((.P , C , passT f) ∷ fs) ((C' , f') ∷ fs') eq with inj∷ eq
+... | refl , eq1 = cong₂ _∷_ refl (emb-pT-untagF-pass fs fs' eq1)
 
 
-emb-pT-untagP-∧l₁ : {Γ : Cxt} {A B : Fma}
+emb-pT-untagF-∧l₁ : {Γ : Cxt} {A B : Fma}
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t (just (A ∧ B) , tt) Γ))))
   → (fs' : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs'
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs'
   → fs ≡ mapList (λ x → ∧l₁T' x) fs'
-emb-pT-untagP-∧l₁ [] [] refl = refl
-emb-pT-untagP-∧l₁ ((.C₁ , C , ∧l₁T f) ∷ fs) ((C' , f') ∷ fs') eq with inj∷ eq
-... | refl , eq2 = cong₂ _∷_ refl (emb-pT-untagP-∧l₁ fs fs' eq2)
+emb-pT-untagF-∧l₁ [] [] refl = refl
+emb-pT-untagF-∧l₁ ((.C₁ , C , ∧l₁T f) ∷ fs) ((C' , f') ∷ fs') eq with inj∷ eq
+... | refl , eq2 = cong₂ _∷_ refl (emb-pT-untagF-∧l₁ fs fs' eq2)
 
-emb-pT-untagP-∧l₂ : {Γ : Cxt} {A B : Fma}
+emb-pT-untagF-∧l₂ : {Γ : Cxt} {A B : Fma}
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t (just (A ∧ B) , tt) Γ))))
   → (fs' : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B) Γ)))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs'
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs'
   → fs ≡ mapList (λ x → ∧l₂T' x) fs'
-emb-pT-untagP-∧l₂ [] [] refl = refl
-emb-pT-untagP-∧l₂ ((.C₂ , C , ∧l₂T f) ∷ fs) ((C' , f') ∷ fs') eq with inj∷ eq
-... | refl , eq1 = cong₂ _∷_ refl (emb-pT-untagP-∧l₂ fs fs' eq1)
+emb-pT-untagF-∧l₂ [] [] refl = refl
+emb-pT-untagF-∧l₂ ((.C₂ , C , ∧l₂T f) ∷ fs) ((C' , f') ∷ fs') eq with inj∷ eq
+... | refl , eq1 = cong₂ _∷_ refl (emb-pT-untagF-∧l₂ fs fs' eq1)
 
-emb-pT-untagP-f-eq : {t t' : Tag} {S : Irr} {Γ : Cxt} {C C' : Pos}
+emb-pT-untagF-f-eq : {t t' : Tag} {S : Irr} {Γ : Cxt} {C C' : Pos}
   → (f : t ∣ S ∣ Γ ⊢fT C)
   → (f' : t' ∣ S ∣ Γ ⊢fT C')
-  → emb-pT-untagP (t , C , f) ≡ (C' , f2li (untagF f'))
+  → emb-pT-untagF (t , C , f) ≡ (C' , f2li (untagF f'))
   → Σ (t ≡ t') (λ eq1 → Σ (C ≡ C') (λ eq2 → f' ≡ subst₂ (λ x → λ y → x ∣ S ∣ Γ ⊢fT y) eq1 eq2 f))
-emb-pT-untagP-f-eq (passT f) (passT .f) refl = refl , refl , refl
-emb-pT-untagP-f-eq ax ax refl = refl , refl , refl
-emb-pT-untagP-f-eq Ir Ir refl = refl , refl , refl
-emb-pT-untagP-f-eq (⊗rT l ok eq₁ f g) (⊗rT .l .ok .eq₁ .f .g) refl = refl , refl , refl
-emb-pT-untagP-f-eq (∧l₁T f) (∧l₁T .f) refl = refl , refl , refl
-emb-pT-untagP-f-eq (∧l₂T f) (∧l₂T .f) refl = refl , refl , refl
+emb-pT-untagF-f-eq (passT f) (passT .f) refl = refl , refl , refl
+emb-pT-untagF-f-eq ax ax refl = refl , refl , refl
+emb-pT-untagF-f-eq Ir Ir refl = refl , refl , refl
+emb-pT-untagF-f-eq (⊗rT l ok eq₁ f g) (⊗rT .l .ok .eq₁ .f .g) refl = refl , refl , refl
+emb-pT-untagF-f-eq (∧l₁T f) (∧l₁T .f) refl = refl , refl , refl
+emb-pT-untagF-f-eq (∧l₂T f) (∧l₂T .f) refl = refl , refl , refl
 
-emb-pT-untagP-fs : {S : Irr} {Γ : Cxt}
+emb-pT-untagF-fs : {S : Irr} {Γ : Cxt}
   → (fs fs' : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t S Γ))))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs'
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs'
   → fs ≡ fs'
-emb-pT-untagP-fs [] [] refl  = refl
-emb-pT-untagP-fs ((t , C , f) ∷ fs) ((t' , C' , f') ∷ fs') eq with inj∷ eq
-... | eq1 , eq2 with emb-pT-untagP-f-eq f f' eq1
-... | refl , refl , refl = cong ((t , C , f) ∷_) (emb-pT-untagP-fs fs fs' eq2)
+emb-pT-untagF-fs [] [] refl  = refl
+emb-pT-untagF-fs ((t , C , f) ∷ fs) ((t' , C' , f') ∷ fs') eq with inj∷ eq
+... | eq1 , eq2 with emb-pT-untagF-f-eq f f' eq1
+... | refl , refl , refl = cong ((t , C , f) ∷_) (emb-pT-untagF-fs fs fs' eq2)
 
 
 isOKC₁-refl : (l : List Tag)
@@ -144,7 +144,7 @@ isOKC₁-refl (C₂ ∷ l) ok ok' = refl
 isOKC₁-⊥ : {Γ : Cxt} {A B : Fma}
   → (fs : List (Σ Tag (λ t₁ → Σ Pos (_∣_∣_⊢fT_ t₁ (just (A ∧ B) , tt) Γ))))
   → (fs' : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs'
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs'
   → (isOKC₁ (mapList proj₁ fs))
   → ⊥
 isOKC₁-⊥ [] [] eq ()
@@ -160,7 +160,7 @@ isOKC₂-refl (C₂ ∷ l) ok ok' = isOKC₂-refl l ok ok'
 isOKC₂-⊥ : {Γ : Cxt} {A B : Fma}
   → (fs : List (Σ Tag (λ t₁ → Σ Pos (_∣_∣_⊢fT_ t₁ (just (A ∧ B) , tt) Γ))))
   → (fs' : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B) Γ)))
-  → mapList emb-pT-untagP fs ≡ mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs'
+  → mapList emb-pT-untagF fs ≡ mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs'
   → (isOKC₂ (mapList proj₁ fs))
   → ⊥
 isOKC₂-⊥ [] [] eq ()
@@ -178,7 +178,7 @@ check-focus-ok : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
   → (f : t ∣ S ∣ Γ ⊢fT C)
   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t S Γ))))
   → (ok : isOK (mapList proj₁ ((t , C , f) ∷ fs)))
-  → check-focus (emb-pT-untagP (t , C , f)) (mapList emb-pT-untagP fs) 
+  → check-focus (emb-pT-untagF (t , C , f)) (mapList emb-pT-untagF fs) 
     ≡ inj₂ ((t , C , f) ∷ fs , refl , ok)
 check-focus-ok (passT f) ((t , C , f') ∷ fs) ok rewrite check-focus-ok f' fs ok = refl
 check-focus-ok ax [] ok = refl
@@ -194,11 +194,11 @@ check-focus-ok {S = S , snd} (⊗rT l ok₁ refl f g) [] ok with irr-eq S snd
 ... | refl = refl
 check-focus-ok {S = just .(` _) , .tt} ((⊗rT l {Γ = []} ok₁ refl f g)) ((.R , .(` _ , tt) , ax) ∷ fs) ok 
   rewrite check-focus-ok ax fs _ = refl
-check-focus-ok {S = just x , snd} ((⊗rT l ok₁ eq f g)) ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ ok₂ eq₁ f₁ g₁)) ∷ fs) ok with check-focus {S = just x , snd} (emb-pT-untagP (R , (_ ⊗ _ , tt) , (⊗rT l₁ ok₂ eq₁ f₁ g₁))) (mapList emb-pT-untagP fs)
+check-focus-ok {S = just x , snd} ((⊗rT l ok₁ eq f g)) ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ ok₂ eq₁ f₁ g₁)) ∷ fs) ok with check-focus {S = just x , snd} (emb-pT-untagF (R , (_ ⊗ _ , tt) , (⊗rT l₁ ok₂ eq₁ f₁ g₁))) (mapList emb-pT-untagF fs)
 ... | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())) 
 ... | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))) 
 ... | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l₂ ok₄ eq₃ f₂ g₂)) ∷ fs' , eq₂ , ok₃) with inj∷ eq₂
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1
 check-focus-ok {_} {just (` x) , snd} ((⊗rT l {Γ = Γ} {Δ} ok₁ refl f g)) ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ {Γ = Γ'} {[]} ok₂ eq₁ f₁ g₁)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ {Γ = Γ'} {[]} ok₂ eq₁ f₁ g₁)) ∷ fs , eq₂ , ok₃) | refl , eq1 | refl 
   rewrite check-focus-ok ((⊗rT l₁ ok₂ eq₁ f₁ g₁)) fs tt = refl
 check-focus-ok {_} {just (` x) , snd} ((⊗rT l {Γ = Γ} {Δ} ok₁ refl f g)) ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ {Γ = Γ'} {x₁ ∷ Δ'} ok₂ eq₁ f₁ g₁)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ {Γ = Γ'} {x₁ ∷ Δ'} ok₂ eq₁ f₁ g₁)) ∷ fs , eq₂ , ok₃) | refl , eq1 | refl with cases++ Γ' Γ Δ' Δ eq₁
@@ -213,45 +213,45 @@ check-focus-ok {_} {just (C ∧ D) , snd} ((⊗rT l {Γ = .(Γ' ++ x₁ ∷ Ω)}
   rewrite check-focus-ok ((⊗rT l₁ ok₂ refl f₁ g₁)) fs tt = refl
 check-focus-ok {_} {just (C ∧ D) , snd} ((⊗rT l {Γ = Γ} {.(Ω ++ x₁ ∷ Δ')} ok₁ refl f g)) ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ {Γ = .(Γ ++ Ω)} {x₁ ∷ Δ'} ok₂ refl f₁ g₁)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ {Γ = .(Γ ++ Ω)} {x₁ ∷ Δ'} ok₂ refl f₁ g₁)) ∷ fs , eq₂ , ok₃) | refl , eq1 | refl | inj₂ (Ω , refl , refl) 
   rewrite check-focus-ok ((⊗rT l₁ ok₂ refl f₁ g₁)) fs tt = refl
-check-focus-ok {S = just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok with check-focus (emb-pT-untagP (C₁ , C , ∧l₁T f₁)) (mapList emb-pT-untagP fs)
+check-focus-ok {S = just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok with check-focus (emb-pT-untagF (C₁ , C , ∧l₁T f₁)) (mapList emb-pT-untagF fs)
 ... | inj₁ (inj₁ (A , B , [] , refl , ()))
 ... | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , eq2)) with inj∷ eq2 
-... | refl , eq3 with emb-pT-untagP-∧l₁ fs fs' eq3
+... | refl , eq3 with emb-pT-untagF-∧l₁ fs fs' eq3
 check-focus-ok {_} {just .(A ∧ B) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ .(mapList (λ x → C₁ , proj₁ x , ∧l₁T (proj₂ x)) fs')) ok | inj₁ (inj₁ (A , B , (C , f₁) ∷ fs' , refl , refl)) | refl , eq3 | refl = refl
 check-focus-ok {_} {just .(A ∧ B) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
 check-focus-ok {_} {just .(A ∧ B) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
-check-focus-ok {_} {just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , C' , (∧l₁T f₂)) ∷ fs' , eq , ok₂) with emb-pT-untagP-fs fs fs' (proj₂ (inj∷ eq))
+check-focus-ok {_} {just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , C' , (∧l₁T f₂)) ∷ fs' , eq , ok₂) with emb-pT-untagF-fs fs fs' (proj₂ (inj∷ eq))
 check-focus-ok {_} {just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , .C , (∧l₁T .f₁)) ∷ .fs , refl , ok₂) | refl = refl
-check-focus-ok {S = just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok with check-focus (emb-pT-untagP (C₂ , C , ∧l₂T f₁)) (mapList emb-pT-untagP fs)
+check-focus-ok {S = just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok with check-focus (emb-pT-untagF (C₂ , C , ∧l₂T f₁)) (mapList emb-pT-untagF fs)
 ... | inj₁ (inj₁ (A , B , [] , refl , ()))
 ... | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
 ... | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
 ... | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , eq))) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-∧l₂ fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-∧l₂ fs fs' eq1
 check-focus-ok {_} {just .(A ∧ B) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₂ , C , ∧l₂T f₁) ∷ .(mapList (λ x → C₂ , proj₁ x , ∧l₂T (proj₂ x)) fs')) ok | inj₁ (inj₂ (inj₁ (A , B , (C , f₁) ∷ fs' , refl , refl))) | refl , eq1 | refl = refl
-check-focus-ok {S = just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C' , ∧l₂T f₂) ∷ fs' , eq , ok₂) with emb-pT-untagP-fs fs fs' (proj₂ (inj∷ eq))
+check-focus-ok {S = just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C' , ∧l₂T f₂) ∷ fs' , eq , ok₂) with emb-pT-untagF-fs fs fs' (proj₂ (inj∷ eq))
 check-focus-ok {_} {just .(_ ∧ _) , .tt} ((⊗rT l ok₁ refl f g)) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , .C , ∧l₂T .f₁) ∷ .fs , refl , ok₂) | refl = refl
-check-focus-ok {S = - , tt} ((⊗rT l {Γ = []} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok with check-focus (emb-pT-untagP (P , C , passT f₁)) (mapList emb-pT-untagP fs)
+check-focus-ok {S = - , tt} ((⊗rT l {Γ = []} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok with check-focus (emb-pT-untagF (P , C , passT f₁)) (mapList emb-pT-untagF fs)
 ... | inj₁ (inj₂ (inj₂ (A , Γ' , (C' , f') ∷ fs' , refl , refl , eq))) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-pass fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-pass fs fs' eq1
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {[]} ok₁ refl f g)) ((.P , C , passT f₁) ∷ .(mapList passT' fs')) ok | inj₁ (inj₂ (inj₂ (A , Γ' , (C , f₁) ∷ fs' , refl , refl , refl))) | refl , eq1 | refl = refl
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {[]} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok | inj₂ ((.P , C' , passT f₂) ∷ fs' , eq , ok₂) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {[]} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok | inj₂ ((.P , C , passT f₁) ∷ .fs , refl , ok₂) | refl , eq1 | refl = refl
-check-focus-ok {S = - , tt} ((⊗rT l {Γ = x ∷ Γ} ok₁ eq f g)) ((.P , C , passT f₁) ∷ fs) ok with check-focus (emb-pT-untagP (P , C , passT f₁)) (mapList emb-pT-untagP fs)
+check-focus-ok {S = - , tt} ((⊗rT l {Γ = x ∷ Γ} ok₁ eq f g)) ((.P , C , passT f₁) ∷ fs) ok with check-focus (emb-pT-untagF (P , C , passT f₁)) (mapList emb-pT-untagF fs)
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {.A ∷ Γ} {Δ} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok | inj₁ (inj₂ (inj₂ (A , .(Γ ++ Δ) , (C' , f') ∷ fs' , refl , refl , eq))) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-pass fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-pass fs fs' eq1
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {.A ∷ Γ} {Δ} ok₁ refl f g)) ((.P , C , passT f₁) ∷ .(mapList passT' fs')) ok | inj₁ (inj₂ (inj₂ (A , .(Γ ++ Δ) , (C , f₁) ∷ fs' , refl , refl , refl))) | refl , refl | refl 
   rewrite check-focus-all-pass f₁ fs' = refl
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {x ∷ Γ} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok | inj₂ ((.P , C' , passT f₂) ∷ fs' , eq , ok₂) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1
 check-focus-ok {_} { - , tt} ((⊗rT l {_} {x ∷ Γ} ok₁ refl f g)) ((.P , C , passT f₁) ∷ fs) ok | inj₂ ((.P , C , passT f₁) ∷ .fs , refl , ok₂) | refl , eq1 | refl rewrite check-focus-ok (passT f₁) fs ok₂ = refl
 check-focus-ok {S = - , tt} ((⊗rT l {Γ = []} ok₁ refl f g)) ((.R , .(I , tt) , Ir) ∷ fs) ok 
   rewrite check-focus-ok Ir fs _ = refl
-check-focus-ok {S = - , snd} ((⊗rT l ok₁ eq f g)) ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {A = A} {B} ok₂ eq₁ f₁ g₁)) ∷ fs) ok with check-focus (emb-pT-untagP (R , (A ⊗ B , tt) , (⊗rT l₁ ok₂ eq₁ f₁ g₁))) (mapList emb-pT-untagP fs)
+check-focus-ok {S = - , snd} ((⊗rT l ok₁ eq f g)) ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {A = A} {B} ok₂ eq₁ f₁ g₁)) ∷ fs) ok with check-focus (emb-pT-untagF (R , (A ⊗ B , tt) , (⊗rT l₁ ok₂ eq₁ f₁ g₁))) (mapList emb-pT-untagF fs)
 ... | inj₁ (inj₂ (inj₂ (A' , Γ' , (C' , f') ∷ fs' , refl , refl , ())))
 ... | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l₂ ok₄ eq₂ f₂ g₂)) ∷ fs' , eq , ok₃) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1
 check-focus-ok {_} { - , snd} ((⊗rT l {Γ = Γ} {Δ} ok₁ refl f g)) ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {Γ = .(Γ ++ Δ)} {[]} {A = A} {B} ok₂ refl f₁ g₁)) ∷ fs) ok | inj₂ ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {Γ = .(Γ ++ Δ)} {[]} ok₂ refl f₁ g₁)) ∷ fs , refl , ok₃) | refl , eq1 | refl 
   rewrite check-focus-ok ((⊗rT l₁ {A = A} {B} ok₂ refl f₁ g₁)) fs tt = refl
 check-focus-ok {_} { - , snd} ((⊗rT l {Γ = Γ} {Δ} ok₁ refl f g)) ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {Γ = Γ'} {x ∷ Δ'} {A = A} {B} ok₂ eq₁ f₁ g₁)) ∷ fs) ok | inj₂ ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {Γ = Γ'} {x ∷ Δ'} ok₂ eq₁ f₁ g₁)) ∷ fs , refl , ok₃) | refl , eq1 | refl with cases++ Γ' Γ Δ' Δ eq₁
@@ -259,39 +259,39 @@ check-focus-ok {_} { - , snd} ((⊗rT l {Γ = .(Γ' ++ x ∷ Ω)} {Δ} ok₁ ref
   rewrite check-focus-ok ((⊗rT l₁ {A = A} {B} ok₂ refl f₁ g₁)) fs tt = refl
 check-focus-ok {_} { - , snd} ((⊗rT l {Γ = Γ} {.(Ω ++ x ∷ Δ')} ok₁ refl f g)) ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {Γ = .(Γ ++ Ω)} {x ∷ Δ'} {A = A} {B} ok₂ refl f₁ g₁)) ∷ fs) ok | inj₂ ((.R , .(A ⊗ B , tt) , (⊗rT l₁ {Γ = .(Γ ++ Ω)} {x ∷ Δ'} ok₂ refl f₁ g₁)) ∷ fs , refl , ok₃) | refl , eq1 | refl | inj₂ (Ω , refl , refl) 
   rewrite check-focus-ok ((⊗rT l₁ {A = A} {B} ok₂ refl f₁ g₁)) fs tt = refl
-check-focus-ok (∧l₁T f) ((t , C , f') ∷ fs) ok with check-focus (emb-pT-untagP (t , C , f')) (mapList emb-pT-untagP fs)
+check-focus-ok (∧l₁T f) ((t , C , f') ∷ fs) ok with check-focus (emb-pT-untagF (t , C , f')) (mapList emb-pT-untagF fs)
 check-focus-ok (∧l₁T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₁ refl f₁ g)) ∷ fs) ok | inj₁ (inj₁ (A , B , (C , f') ∷ fs' , refl , ()))
 check-focus-ok (∧l₁T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₁ eq f₁ g)) ∷ fs) ok | inj₁ (inj₂ (inj₁ (A , B , (C , f') ∷ fs' , refl , ())))
 check-focus-ok (∧l₁T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₁ eq₁ f₁ g)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l₁ ok₃ eq₂ f₂ g₁)) ∷ fs' , eq , ok₂) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1
 check-focus-ok (∧l₁T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₂ refl f₁ g)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₂ refl f₁ g)) ∷ fs , refl , ok₁) | refl , eq1 | refl = refl
 check-focus-ok (∧l₁T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , eq)) = 
   ⊥-elim (isOKC₁-⊥ fs fs' (proj₂ (inj∷ eq)) ok)
 check-focus-ok (∧l₁T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))) 
 check-focus-ok (∧l₁T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((t' , C' , ∧l₁T f') ∷ fs' , eq , ok₁) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1 
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1 
 check-focus-ok (∧l₁T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , C , ∧l₁T f₁) ∷ .fs , refl , ok₁) | refl , eq1 | refl rewrite isOKC₁-refl (mapList proj₁ fs) ok ok₁ = refl
 check-focus-ok (∧l₁T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
 check-focus-ok (∧l₁T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , eq))) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-∧l₂ fs fs' eq1
+... | refl , eq1 with emb-pT-untagF-∧l₂ fs fs' eq1
 check-focus-ok (∧l₁T f) ((.C₂ , C , ∧l₂T f₁) ∷ .(mapList (λ x → C₂ , proj₁ x , (∧l₂T (proj₂ x))) fs')) ok | inj₁ (inj₂ (inj₁ (A , B , (C , f₁) ∷ fs' , refl , refl))) | refl , eq1 | refl = refl
 check-focus-ok (∧l₁T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C' , (∧l₂T f')) ∷ fs' , eq , ok₁) with inj∷ eq
-... | refl , eq1 with emb-pT-untagP-fs fs fs' eq1 
+... | refl , eq1 with emb-pT-untagF-fs fs fs' eq1 
 check-focus-ok (∧l₁T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C , ∧l₂T f₁) ∷ .fs , refl , ok₁) | refl , eq1 | refl = refl
-check-focus-ok (∧l₂T f) ((t , C , f') ∷ fs) ok with check-focus (emb-pT-untagP (t , C , f')) (mapList emb-pT-untagP fs)
+check-focus-ok (∧l₂T f) ((t , C , f') ∷ fs) ok with check-focus (emb-pT-untagF (t , C , f')) (mapList emb-pT-untagF fs)
 check-focus-ok (∧l₂T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₁ refl f₁ g)) ∷ fs) ok | inj₁ (inj₁ (A , B , (C' , f'') ∷ fs' , refl , ())) 
 check-focus-ok (∧l₂T f) ((.C₂ , _ , ∧l₂T f₁) ∷ fs) ok | inj₁ (inj₁ (A , B , (C' , f'') ∷ fs' , refl , ())) 
 check-focus-ok (∧l₂T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₁ (inj₁ (A , B , (C' , f'') ∷ fs' , refl , eq2)) with inj∷ eq2 
-... | refl , eq3 with emb-pT-untagP-∧l₁ fs fs' eq3
+... | refl , eq3 with emb-pT-untagF-∧l₁ fs fs' eq3
 check-focus-ok (∧l₂T f) ((.C₁ , C , ∧l₁T f₁) ∷ .(mapList (λ x → C₁ , proj₁ x , ∧l₁T (proj₂ x)) fs')) ok | inj₁ (inj₁ (A , B , (C , f₁) ∷ fs' , refl , refl)) | refl , eq3 | refl = refl 
 check-focus-ok (∧l₂T f) ((t , C , f') ∷ fs) ok | inj₁ (inj₂ (inj₁ (A , B , (C' , f'') ∷ fs' , refl , eq))) = ⊥-elim (isOKC₂-⊥ ((t , C , f') ∷ fs) ((C' , f'') ∷ fs') eq ok)
 check-focus-ok (∧l₂T f) ((t , C , f') ∷ fs) ok | inj₂ ((t' , C' , f'') ∷ fs' , eq , ok₁) with inj∷ eq
 ... | eq1 , eq2 with cong proj₁ eq1
-check-focus-ok (∧l₂T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₂ eq₁ f₁ g)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT .l .ok₂ .eq₁ .f₁ .g)) ∷ fs' , eq , ok₁) | refl , eq2 | refl with emb-pT-untagP-fs fs fs' eq2 
+check-focus-ok (∧l₂T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₂ eq₁ f₁ g)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT .l .ok₂ .eq₁ .f₁ .g)) ∷ fs' , eq , ok₁) | refl , eq2 | refl with emb-pT-untagF-fs fs fs' eq2 
 check-focus-ok (∧l₂T f) ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok₂ refl f₁ g)) ∷ fs) ok | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT .l .ok₂ .refl .f₁ .g)) ∷ .fs , refl , ok₁) | refl , eq2 | refl | refl = refl
-check-focus-ok (∧l₂T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , C , ∧l₁T f₂) ∷ fs' , eq , ok₁) | refl , eq2 | refl with emb-pT-untagP-fs fs fs' eq2
+check-focus-ok (∧l₂T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , C , ∧l₁T f₂) ∷ fs' , eq , ok₁) | refl , eq2 | refl with emb-pT-untagF-fs fs fs' eq2
 check-focus-ok (∧l₂T f) ((.C₁ , C , ∧l₁T f₁) ∷ fs) ok | inj₂ ((.C₁ , C , ∧l₁T f₁) ∷ .fs , refl , ok₁) | refl , eq2 | refl | refl = refl
-check-focus-ok (∧l₂T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C , ∧l₂T f₂) ∷ fs' , eq , ok₁) | eq1 , eq2 | refl with emb-pT-untagP-fs fs fs' eq2
+check-focus-ok (∧l₂T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C , ∧l₂T f₂) ∷ fs' , eq , ok₁) | eq1 , eq2 | refl with emb-pT-untagF-fs fs fs' eq2
 check-focus-ok (∧l₂T f) ((.C₂ , C , ∧l₂T f₁) ∷ fs) ok | inj₂ ((.C₂ , C , ∧l₂T f₂) ∷ fs' , refl , ok₁) | eq1 , eq2 | refl | refl rewrite check-focus-ok (∧l₂T f₂) fs' ok₁ | isOKC₂-refl (mapList proj₁ fs) ok ok₁ = refl
 
 
@@ -303,7 +303,7 @@ mutual
     → (SF : SubFmas Φ A)
     → (eq1 : Φ ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs)
     → (eq2 : l ≡ mapList proj₁ fs)
-    → focus (emb-riT (∧rT* fs SF eq1 eq2)) ≡ ∧r* (mapList (λ x → emb-pT-untagP x) fs) SF eq1
+    → focus (emb-riT (∧rT* fs SF eq1 eq2)) ≡ ∧r* (mapList (λ x → emb-pT-untagF x) fs) SF eq1
   focusemb-∧rT* {S = S} {Γ} fs (conj {Φ} {Ψ} SF SF₁) eq1 refl with fsDist Φ Ψ fs eq1
   focusemb-∧rT* {S = S} {Γ} .(((t , C , f) ∷ fs') ++ (t' , C' , f') ∷ fs'') (conj {.(mapList (λ x → proj₁ (proj₁ (proj₂ x))) fs')} {.(mapList (λ x → proj₁ (proj₁ (proj₂ x))) fs'')} SF SF₁) refl refl | (t , C , f) ∷ fs' , (t' , C' , f') ∷ fs'' , refl , refl , refl 
     rewrite fsDist-white-refl (irr S) Γ {C} {C'} {f2li (untagF f)} {f2li (untagF f')} (mapList (λ z → proj₁ (proj₂ z) , f2li (untagF (proj₂ (proj₂ z)))) fs') (mapList (λ z → proj₁ (proj₂ z) , f2li (untagF (proj₂ (proj₂ z)))) fs'') = 
@@ -314,37 +314,37 @@ mutual
   focusemb-∧rT* ((.R , .(_ ⊗ _ , tt) , (⊗rT l ok refl f g)) ∷ []) stop refl refl with f2fsT f
   ... | (.P , C' , passT f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((P , C' , passT f) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT* ((P , C' , passT f) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((P , C' , passT f) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((P , C' , passT f) ∷ fs)) SF refl |
             check-focus-ok (passT f) fs ok |
             focusemb-ri g = refl
   ... | (.R , .(` _ , tt) , ax) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (` _ , tt) , ax) ∷ fs)) , refl , refl , SF , refl
     rewrite focusemb-∧rT* ((R , (` _  , tt), ax) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((R , (` _  , tt), ax) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((R , (` _  , tt), ax) ∷ fs)) SF refl |
             check-focus-ok ax fs ok |
             focusemb-ri g = refl
   ... | (.R , .(I , tt) , Ir) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (I , tt) , Ir) ∷ fs)) , refl , refl , SF , refl
     rewrite focusemb-∧rT* ((R , (I  , tt), Ir) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((R , (I  , tt), Ir) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((R , (I  , tt), Ir) ∷ fs)) SF refl |
             check-focus-ok Ir fs ok |
             focusemb-ri g = refl
   focusemb-∧rT* ((.R , .(_ ⊗ _ , tt) , (⊗rT .(mapList proj₁ ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g)) ∷ []) stop refl refl | (.R , .(_ ⊗ _ , tt) , (⊗rT l {Γ = []} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl 
      rewrite focusemb-∧rT* ((R , (_ ⊗ _  , tt), (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((R , (_ ⊗ _  , tt), (⊗rT l ok₁ refl f g₁)) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((R , (_ ⊗ _  , tt), (⊗rT l ok₁ refl f g₁)) ∷ fs)) SF refl |
             check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs ok |
             focusemb-ri g = refl
   focusemb-∧rT* ((.R , .(_ ⊗ _ , tt) , (⊗rT .(mapList proj₁ ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g)) ∷ []) stop refl refl | (.R , .(_ ⊗ _ , tt) , (⊗rT l {Γ = x ∷ Γ} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ (proj₂ x₁))) ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT* ((R , (_ ⊗ _  , tt), (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((R , (_ ⊗ _  , tt), (⊗rT l ok₁ refl f g₁)) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((R , (_ ⊗ _  , tt), (⊗rT l ok₁ refl f g₁)) ∷ fs)) SF refl |
             check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs ok |
             focusemb-ri g = refl
   ... | (.C₁ , C' , (∧l₁T f)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₁ , C' , (∧l₁T f)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT* ((C₁ , C' , (∧l₁T f)) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((C₁ , C' , (∧l₁T f)) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((C₁ , C' , (∧l₁T f)) ∷ fs)) SF refl |
             check-focus-ok (∧l₁T f) fs ok |
             focusemb-ri g = refl
   ... | (.C₂ , C' , (∧l₂T f)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₂ , C' , (∧l₂T f)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT* ((C₂ , C' , (∧l₂T f)) ∷ fs) SF refl refl |
-            f2fs-refl (mapList emb-pT-untagP ((C₂ , C' , (∧l₂T f)) ∷ fs)) SF refl |
+            f2fs-refl (mapList emb-pT-untagF ((C₂ , C' , (∧l₂T f)) ∷ fs)) SF refl |
             check-focus-ok  (∧l₂T f) fs ok |
             focusemb-ri g = refl
   focusemb-∧rT* ((.C₁ , C , (∧l₁T f)) ∷ []) stop refl refl = trans (cong ∧l₁-ri (focusemb-li f)) refl
@@ -359,37 +359,37 @@ mutual
   focusemb-fT {S = S} (⊗rT l ok refl f g)with f2fsT f
   ... | (.P , C , passT f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((P , C , passT f) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((P , C , passT f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (pass f)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl ((C , f2li (pass f)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok (passT f) fs ok |
             focusemb-ri g = refl
   focusemb-fT {S = .(just (` X) , tt)} (⊗rT .(mapList proj₁ ((R , (` X , tt) , ax) ∷ fs)) ok refl .(∧rT* ((R , (` X , tt) , ax) ∷ fs) SF refl refl) g) | (.R , .(` X , tt) , (ax {X = X})) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (` X , tt) , ax) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((R , (` X , _) , ax) ∷ fs) SF refl refl |
-            f2fs-refl (((` X , tt) , f2li ax) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((` X , tt) , f2li ax) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ax fs tt |
             focusemb-ri g = refl
   focusemb-fT {S = .(- , tt)} (⊗rT .(mapList proj₁ ((R , (I , tt) , Ir) ∷ fs)) ok refl .(∧rT* ((R , (I , tt) , Ir) ∷ fs) SF refl refl) g) | (.R , .(I , tt) , Ir) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (I , tt) , Ir) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((R , (I , _) , Ir) ∷ fs) SF refl refl |
-            f2fs-refl (((I , tt) , f2li Ir) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((I , tt) , f2li Ir) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok Ir fs tt |
             focusemb-ri g = refl
   focusemb-fT {S = S} (⊗rT .(mapList proj₁ ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g) | (.R , .(A ⊗ B , tt) , (⊗rT l {Γ = []} {A = A} {B} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl
     rewrite focusemb-∧rT*  ((R , (A ⊗ B , _) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (((A ⊗ B , tt) , f2li (⊗r l ok₁ refl f g₁)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((A ⊗ B , tt) , f2li (⊗r l ok₁ refl f g₁)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs tt |
             focusemb-ri g = refl
   focusemb-fT {S = S} (⊗rT .(mapList proj₁ ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g) | (.R , .(A ⊗ B , tt) , (⊗rT l {Γ = x ∷ Γ} {A = A} {B} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ (proj₂ x₁))) ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl
     rewrite focusemb-∧rT*  ((R , (A ⊗ B , _) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (((A ⊗ B , tt) , f2li (⊗r l ok₁ refl f g₁)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((A ⊗ B , tt) , f2li (⊗r l ok₁ refl f g₁)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs tt |
             focusemb-ri g = refl
   focusemb-fT {S = .(just (_ ∧ _) , tt)} (⊗rT .(mapList proj₁ ((C₁ , C , ∧l₁T f) ∷ fs)) ok refl .(∧rT* ((C₁ , C , ∧l₁T f) ∷ fs) SF refl refl) g) | (.C₁ , C , ∧l₁T {B = B} f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₁ , C , ∧l₁T f) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((C₁ , C , ∧l₁T {B = B} f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (∧l₁ f)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl ((C , f2li (∧l₁ f)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok (∧l₁T {B = B} f) fs ok |
             focusemb-ri g = refl
   focusemb-fT {S = .(just (_ ∧ _) , tt)} (⊗rT .(mapList proj₁ ((C₂ , C , ∧l₂T f) ∷ fs)) ok refl .(∧rT* ((C₂ , C , ∧l₂T f) ∷ fs) SF refl refl) g) | (.C₂ , C , ∧l₂T {A = A} f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₂ , C , ∧l₂T f) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((C₂ , C , ∧l₂T {A = A} f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (∧l₂ f)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl ((C , f2li (∧l₂ f)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok (∧l₂T {A = A} f) fs ok |
             focusemb-ri g  = refl
   focusemb-fT (∧l₁T f) = cong ∧l₁-ri (focusemb-li f)
@@ -404,37 +404,37 @@ mutual
   focusemb-f {S} (⊗r l ok refl f g) with f2fsT f
   ... | (.P , C , passT f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((P , C , passT f) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((P , C , passT f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (pass f)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl ((C , f2li (pass f)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok (passT f) fs ok |
             focusemb-ri g = refl
   focusemb-f {.(just (` X) , tt)} (⊗r .(mapList proj₁ ((R , (` X , tt) , ax) ∷ fs)) ok refl .(∧rT* ((R , (` X , tt) , ax) ∷ fs) SF refl refl) g) | (.R , .(` X , tt) , (ax {X})) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (` X , tt) , ax) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((R , (` X , _) , ax) ∷ fs) SF refl refl |
-            f2fs-refl (((` X , tt) , f2li (ax)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((` X , tt) , f2li (ax)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ax fs tt |
             focusemb-ri g = refl
   ... | (.R , .(I , tt) , Ir) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (I , tt) , Ir) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((R , (I , _) , Ir) ∷ fs) SF refl refl |
-            f2fs-refl (((I , tt) , f2li (Ir)) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((I , tt) , f2li (Ir)) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok Ir fs tt |
             focusemb-ri g = refl
   focusemb-f {S} (⊗r .(mapList proj₁ ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g) | (.R , .(A ⊗ B , tt) , (⊗rT l {Γ = []} {A = A} {B} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((R , (A ⊗ B , _) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (((A ⊗ B , tt) , f2li ((⊗r l ok₁ refl f g₁))) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((A ⊗ B , tt) , f2li ((⊗r l ok₁ refl f g₁))) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs tt |
             focusemb-ri g = refl
   focusemb-f {S} (⊗r .(mapList proj₁ ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g) | (.R , .(A ⊗ B , tt) , (⊗rT l {Γ = x ∷ Γ} {A = A} {B} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ (proj₂ x₁))) ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((R , (A ⊗ B , _) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (((A ⊗ B , tt) , f2li ((⊗r l ok₁ refl f g₁))) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl (((A ⊗ B , tt) , f2li ((⊗r l ok₁ refl f g₁))) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs tt |
             focusemb-ri g = refl
   focusemb-f {.(just (_ ∧ _) , tt)} (⊗r .(mapList proj₁ ((C₁ , C , (∧l₁T f)) ∷ fs)) ok refl .(∧rT* ((C₁ , C , (∧l₁T f)) ∷ fs) SF refl refl) g) | (.C₁ , C , (∧l₁T {B = B} f)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₁ , C , (∧l₁T f)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((C₁ , C , (∧l₁T {B = B} f)) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li ((∧l₁ f))) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl ((C , f2li ((∧l₁ f))) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ((∧l₁T {B = B} f)) fs ok |
             focusemb-ri g = refl
   focusemb-f {.(just (A ∧ _) , tt)} (⊗r .(mapList proj₁ ((C₂ , C , (∧l₂T f)) ∷ fs)) ok refl .(∧rT* ((C₂ , C , (∧l₂T f)) ∷ fs) SF refl refl) g) | (.C₂ , C , (∧l₂T {A = A} f)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₂ , C , (∧l₂T f)) ∷ fs)) , refl , refl , SF , refl 
     rewrite focusemb-∧rT*  ((C₂ , C , (∧l₂T {A = A} f)) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li ((∧l₂ f))) ∷ mapList emb-pT-untagP fs) SF refl |
+            f2fs-refl ((C , f2li ((∧l₂ f))) ∷ mapList emb-pT-untagF fs) SF refl |
             check-focus-ok ((∧l₂T {A = A} f)) fs ok |
             focusemb-ri g  = refl
   focusemb-f (∧l₁ f) = cong ∧l₁-ri (focusemb-li f)
