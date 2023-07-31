@@ -216,12 +216,6 @@ untagF (∧l₂T f) = ∧l₂ f
 untagF (∨r₁T l ok f) = ∨r₁ l ok f
 untagF (∨r₂T l ok f) = ∨r₂ l ok f
 
--- untagP : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
---   → t ∣ S ∣ Γ ⊢pT C
---   → S ∣ Γ ⊢p C
--- untagP (passT f) = pass f
--- untagP (f2pT f) = f2p (untagF f)
-
 untagF' :  {S : Irr} {Γ : Cxt}
   → Σ Tag (λ t → Σ Pos (λ C → t ∣ S ∣ Γ ⊢fT C)) 
   → Σ Pos (λ C → S ∣ Γ ⊢f C)
@@ -308,519 +302,508 @@ Il-inv-fs-eq ((C , Il f) ∷ fs) = cong (pos C ∷_) (Il-inv-fs-eq fs)
 ∨l-inv-fs-eq₂ ((C , ∨l f g) ∷ fs) = cong (pos C ∷_) (∨l-inv-fs-eq₂ fs)
 {-# REWRITE ∨l-inv-fs-eq₂ #-}
 
--- p2li-pass-fs-eq : {A : Fma} {Γ : Cxt}
---   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
---   → mapList (λ x → pos (proj₁ x)) (mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
--- p2li-pass-fs-eq [] = refl
--- p2li-pass-fs-eq ((C , f) ∷ fs) = cong (pos C ∷_) (p2li-pass-fs-eq fs)
--- {-# REWRITE p2li-pass-fs-eq #-}
+f2li-pass-fs-eq : {A : Fma} {Γ : Cxt}
+  → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
+  → mapList (λ x → pos (proj₁ x)) (mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
+f2li-pass-fs-eq [] = refl
+f2li-pass-fs-eq ((C , f) ∷ fs) = cong (pos C ∷_) (f2li-pass-fs-eq fs)
+{-# REWRITE f2li-pass-fs-eq #-}
 
--- p2li-f2p-∧l₁-fs-eq : {A B : Fma} {Γ : Cxt}
---   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
---   → mapList (λ x → proj₁ (proj₁ x)) (mapList (λ x → proj₁ x , p2li (f2p (∧l₁ {B = B} (proj₂ x)))) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
--- p2li-f2p-∧l₁-fs-eq [] = refl
--- p2li-f2p-∧l₁-fs-eq (x ∷ fs) = cong (proj₁ (proj₁ x) ∷_) (p2li-f2p-∧l₁-fs-eq fs)
--- {-# REWRITE p2li-f2p-∧l₁-fs-eq #-}
+f2li-∧l₁-fs-eq : {A B : Fma} {Γ : Cxt}
+  → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
+  → mapList (λ x → proj₁ (proj₁ x)) (mapList (λ x → proj₁ x , f2li (∧l₁ {B = B} (proj₂ x))) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
+f2li-∧l₁-fs-eq [] = refl
+f2li-∧l₁-fs-eq (x ∷ fs) = cong (proj₁ (proj₁ x) ∷_) (f2li-∧l₁-fs-eq fs)
+{-# REWRITE f2li-∧l₁-fs-eq #-}
 
--- p2li-f2p-∧l₂-fs-eq : {A B : Fma} {Γ : Cxt}
---   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B) Γ)))
---   → mapList (λ x → proj₁ (proj₁ x)) (mapList (λ x → proj₁ x , p2li (f2p (∧l₂ {A = A} (proj₂ x)))) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
--- p2li-f2p-∧l₂-fs-eq [] = refl
--- p2li-f2p-∧l₂-fs-eq (x ∷ fs) = cong (proj₁ (proj₁ x) ∷_) (p2li-f2p-∧l₂-fs-eq fs)
--- {-# REWRITE p2li-f2p-∧l₂-fs-eq #-}
+f2li-∧l₂-fs-eq : {A B : Fma} {Γ : Cxt}
+  → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B) Γ)))
+  → mapList (λ x → proj₁ (proj₁ x)) (mapList (λ x → proj₁ x , f2li (∧l₂ {A = A} (proj₂ x))) fs) ≡ mapList (λ x → pos (proj₁ x)) fs
+f2li-∧l₂-fs-eq [] = refl
+f2li-∧l₂-fs-eq (x ∷ fs) = cong (proj₁ (proj₁ x) ∷_) (f2li-∧l₂-fs-eq fs)
+{-# REWRITE f2li-∧l₂-fs-eq #-}
 
--- irr-eq : (S : Stp) (p : isIrr S) → irr (S , p) ≡ S
--- irr-eq (just (` x)) tt = refl
--- irr-eq (just (x ∧ x₁)) tt = refl
--- irr-eq - tt = refl
+irr-eq : (S : Stp) (p : isIrr S) → irr (S , p) ≡ S
+irr-eq (just (` x)) tt = refl
+irr-eq (just (x ∧ x₁)) tt = refl
+irr-eq - tt = refl
 
--- isIrr-unique : (S : Stp) (p q : isIrr S) → p ≡ q 
--- isIrr-unique (just (` x)) p q = refl
--- isIrr-unique (just (x ∧ x₁)) p q = refl
--- isIrr-unique - p q = refl
+isIrr-unique : (S : Stp) (p q : isIrr S) → p ≡ q 
+isIrr-unique (just (` x)) p q = refl
+isIrr-unique (just (x ∧ x₁)) p q = refl
+isIrr-unique - p q = refl
 
--- p2li-f2p-p2li-untagP-∧l₁-fs-eq : {Γ : Cxt} {A B : Fma} 
---   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
---   → mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) (mapList (λ x → f2pT' (∧l₁T' {B = B} x)) fs)
---     ≡ mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs
--- p2li-f2p-p2li-untagP-∧l₁-fs-eq [] = refl
--- p2li-f2p-p2li-untagP-∧l₁-fs-eq (x ∷ fs) = cong₂ _∷_ refl (p2li-f2p-p2li-untagP-∧l₁-fs-eq fs)
--- {-# REWRITE p2li-f2p-p2li-untagP-∧l₁-fs-eq #-}
+f2li-untagF-∧l₁-fs-eq : {Γ : Cxt} {A B : Fma} 
+  → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
+  → mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) (mapList (λ x → ∧l₁T' {B = B} x) fs)
+    ≡ mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs
+f2li-untagF-∧l₁-fs-eq [] = refl
+f2li-untagF-∧l₁-fs-eq (x ∷ fs) = cong₂ _∷_ refl (f2li-untagF-∧l₁-fs-eq fs)
+{-# REWRITE f2li-untagF-∧l₁-fs-eq #-}
 
--- p2li-f2p-p2li-untagP-∧l₂-fs-eq : {Γ : Cxt} {A B : Fma} 
---   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B) Γ)))
---   → mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) (mapList (λ x → f2pT' (∧l₂T' {A = A} x)) fs)
---     ≡ mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs
--- p2li-f2p-p2li-untagP-∧l₂-fs-eq [] = refl
--- p2li-f2p-p2li-untagP-∧l₂-fs-eq (x ∷ fs) = cong₂ _∷_ refl ((p2li-f2p-p2li-untagP-∧l₂-fs-eq fs))
--- {-# REWRITE p2li-f2p-p2li-untagP-∧l₂-fs-eq #-}
+f2li-untagF-∧l₂-fs-eq : {Γ : Cxt} {A B : Fma} 
+  → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B) Γ)))
+  → mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) (mapList (λ x → ∧l₂T' {A = A} x) fs)
+    ≡ mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs
+f2li-untagF-∧l₂-fs-eq [] = refl
+f2li-untagF-∧l₂-fs-eq (x ∷ fs) = cong₂ _∷_ refl ((f2li-untagF-∧l₂-fs-eq fs))
+{-# REWRITE f2li-untagF-∧l₂-fs-eq #-}
 
--- p2li-pass-p2li-untagP-passT-fs-eq : {Γ : Cxt} {A' : Fma}
---   → (fs : List (Σ Pos (_∣_⊢li_ (just A') Γ)))
---   → mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) (mapList passT' fs)
---     ≡ mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs
--- p2li-pass-p2li-untagP-passT-fs-eq [] = refl
--- p2li-pass-p2li-untagP-passT-fs-eq (x ∷ fs) = cong₂ _∷_ refl (p2li-pass-p2li-untagP-passT-fs-eq fs)
--- {-# REWRITE p2li-pass-p2li-untagP-passT-fs-eq #-}
+f2li-pass-f2li-untagF-passT-fs-eq : {Γ : Cxt} {A' : Fma}
+  → (fs : List (Σ Pos (_∣_⊢li_ (just A') Γ)))
+  → mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) (mapList passT' fs)
+    ≡ mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs
+f2li-pass-f2li-untagF-passT-fs-eq [] = refl
+f2li-pass-f2li-untagF-passT-fs-eq (x ∷ fs) = cong₂ _∷_ refl (f2li-pass-f2li-untagF-passT-fs-eq fs)
+{-# REWRITE f2li-pass-f2li-untagF-passT-fs-eq #-}
 
--- p2li-untagP-fs-eq : {S : Irr} {Γ : Cxt}
---   → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t S Γ))))
---   → mapList (λ x → proj₁ (proj₁ x)) (mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs)
---     ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs
--- p2li-untagP-fs-eq [] = refl
--- p2li-untagP-fs-eq (x ∷ fs) = cong₂ _∷_ refl (p2li-untagP-fs-eq fs)
--- {-# REWRITE p2li-untagP-fs-eq #-}
+f2li-untagF-fs-eq : {S : Irr} {Γ : Cxt}
+  → (fs : List (Σ Tag (λ t → Σ Pos (_∣_∣_⊢fT_ t S Γ))))
+  → mapList (λ x → proj₁ (proj₁ x)) (mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs)
+    ≡ mapList (λ x → pos (proj₁ (proj₂ x))) fs
+f2li-untagF-fs-eq [] = refl
+f2li-untagF-fs-eq (x ∷ fs) = cong₂ _∷_ refl (f2li-untagF-fs-eq fs)
+{-# REWRITE f2li-untagF-fs-eq #-}
 
--- isOK2isOKL : (t : Tag) {l : List Tag} {Γ : Cxt} {A B : Fma} {C : Pos}
---   → (f : t ∣ just (A ∧ B) , _ ∣ Γ ⊢pT C)
---   → (ok : isOK (t ∷ l))
---   → isOKL (t ∷ l)
--- isOK2isOKL .E (f2pT (⊗rT l₁ ok₁ eq f g)) ok = tt
--- isOK2isOKL .L (f2pT (∧l₁T f)) ok = ok
--- isOK2isOKL .R (f2pT (∧l₂T f)) ok = tt
--- isOK2isOKL .E (f2pT (∨r₁T l₁ ok₁ f)) ok = tt
--- isOK2isOKL .E (f2pT (∨r₂T l₁ ok₁ f)) ok = tt
+isOK2isOKC₁ : (t : Tag) {l : List Tag} {Γ : Cxt} {A B : Fma} {C : Pos}
+  → (f : t ∣ just (A ∧ B) , _ ∣ Γ ⊢fT C)
+  → (ok : isOK (t ∷ l))
+  → isOKC₁ (t ∷ l)
+isOK2isOKC₁ .R (⊗rT l₁ ok₁ eq f g) ok = tt
+isOK2isOKC₁ .C₁ (∧l₁T f) ok = ok
+isOK2isOKC₁ .C₂ (∧l₂T f) ok = tt
+isOK2isOKC₁ .R (∨r₁T l₁ ok₁ f) ok = tt
+isOK2isOKC₁ .R (∨r₂T l₁ ok₁ f) ok = tt
 
--- isOK2isOKR : (t : Tag) {l : List Tag} {Γ : Cxt} {A B : Fma} {C : Pos}
---   → (f : t ∣ just (A ∧ B) , _ ∣ Γ ⊢pT C)
---   → (ok : isOK (t ∷ l))
---   → isOKR (t ∷ l)
--- isOK2isOKR .E (f2pT (⊗rT l₁ ok₁ eq f g)) ok = tt
--- isOK2isOKR .L (f2pT (∧l₁T f)) ok = tt
--- isOK2isOKR .R (f2pT (∧l₂T f)) ok = ok
--- isOK2isOKR .E (f2pT (∨r₁T l₁ ok₁ f)) ok = tt
--- isOK2isOKR .E (f2pT (∨r₂T l₁ ok₁ f)) ok = tt
+isOK2isOKC₂ : (t : Tag) {l : List Tag} {Γ : Cxt} {A B : Fma} {C : Pos}
+  → (f : t ∣ just (A ∧ B) , _ ∣ Γ ⊢fT C)
+  → (ok : isOK (t ∷ l))
+  → isOKC₂ (t ∷ l)
+isOK2isOKC₂ .R (⊗rT l₁ ok₁ eq f g) ok = tt
+isOK2isOKC₂ .C₁ (∧l₁T f) ok = tt
+isOK2isOKC₂ .C₂ (∧l₂T f) ok = ok
+isOK2isOKC₂ .R (∨r₁T l₁ ok₁ f) ok = tt
+isOK2isOKC₂ .R (∨r₂T l₁ ok₁ f) ok = tt
 
--- check-focus : {S : Irr} {Γ : Cxt}
---   → (f : Σ Pos (λ C → irr S ∣ Γ ⊢li C))
---   → (fs : List (Σ Pos (λ C → irr S ∣ Γ ⊢li C)))
---   → (Σ Fma (λ A → Σ Fma (λ B → (Σ (List (Σ Pos (λ C → just A ∣ Γ ⊢li C))) (λ fs' → Σ (irr S ≡ just (A ∧ B)) (λ eq →
---       subst (λ x → List (Σ Pos (λ C → x ∣ Γ ⊢li C))) eq (f ∷ fs) ≡ mapList (λ x → f2li' (f2p' (∧l₁' {B = B} x))) fs')))))
---     ⊎
---     Σ Fma (λ A → Σ Fma (λ B → (Σ (List (Σ Pos (λ C → just B ∣ Γ ⊢li C))) (λ fs' → Σ (irr S ≡ just (A ∧ B)) (λ eq →
---       subst (λ x → List (Σ Pos (λ C → x ∣ Γ ⊢li C))) eq (f ∷ fs) ≡ mapList (λ x → f2li' (f2p' (∧l₂' {A = A} x))) fs')))))
---     ⊎ 
---     Σ Fma (λ A → Σ Cxt (λ Γ' → Σ (List (Σ Pos (λ C → just A ∣ Γ' ⊢li C))) (λ fs' → Σ (irr S ≡ -) (λ eq1 → Σ (Γ ≡ A ∷ Γ') (λ eq2 
---       → subst₂ (λ x → λ y → List (Σ Pos (λ C → x ∣ y ⊢li C))) eq1 eq2 (f ∷ fs) ≡ mapList (λ x → f2li' (pass' x)) fs'))))))
---     ⊎
---     (Σ (List (Σ Tag (λ t → Σ Pos (λ C → t ∣ S ∣ Γ ⊢pT C)))) (λ fs' → f ∷ fs ≡ mapList (λ x → f2li' (untagF' x)) fs' × isOK (mapList proj₁ fs')))
--- check-focus (C , p2li (pass {Γ} {A} f)) [] = inj₁ (inj₂ (inj₂ (A , Γ , (C , f) ∷ [] , refl , refl , refl) ))
--- check-focus (C , p2li (pass f)) ((C' , f') ∷ fs) with check-focus (C' , f') fs
--- ... | inj₁ (inj₂ (inj₂ (A , Γ , (.C' , f'') ∷ fs' , refl , refl , refl))) = inj₁ (inj₂ (inj₂ (A , Γ , (C , f) ∷ (C' , f'') ∷ fs' , refl , refl , refl)))
--- ... | inj₂ ((t , .C' , f'') ∷ fs' , refl , ok) = inj₂ ((P , C , passT f) ∷ (t , C' , f'') ∷ fs'  , refl , ok)
--- check-focus (.(` X , tt) , p2li (f2p (ax {X}))) [] = inj₂ (((E , ((` X , tt) , f2pT ax)) ∷ []) , refl , tt)
--- check-focus (.(I , tt) , p2li (f2p Ir)) [] = inj₂ (((E , ((I , tt) , (f2pT Ir))) ∷ []) , (refl , tt))
--- check-focus {S , q} (.(A ⊗ B , tt) , p2li (f2p (⊗r l {S = .(irr (S , q)) , p} {A = A} {B} ok eq f g))) [] 
---   rewrite irr-eq S p | isIrr-unique S p q = inj₂ (((E , ((A ⊗ B , tt) , f2pT (⊗rT l ok eq f g))) ∷ []) , refl , tt)
--- check-focus (C , p2li (f2p (∧l₁ {A = A} {B} f))) [] = inj₁ (inj₁ (A , B , (((C , f) ∷ []) , (refl , refl))))
--- check-focus (C , p2li (f2p (∧l₂ {A = A} {B} f))) [] = inj₁ (inj₂ (inj₁ (A , (B , (((C , f) ∷ []) , (refl , refl))))))
--- check-focus {S , q} (.(A ∨ B , tt) , p2li (f2p (∨r₁ l {S = .(irr (S , q)) , p} {A = A} {B} ok f))) [] 
---   rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((E , (A ∨ B , tt) , f2pT (∨r₁T l ok f)) ∷ [] , refl , tt)
--- check-focus {S , q} (.(A ∨ B , tt) , p2li (f2p (∨r₂ l {S = .(irr (S , q)) , p} {A = A} {B} ok f))) [] 
---   rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((E , (A ∨ B , tt) , f2pT (∨r₂T l ok f)) ∷ [] , refl , tt)
--- check-focus {S} (C , p2li (f2p f)) ((C' , f') ∷ fs) with check-focus {S} (C' , f') fs
--- check-focus {.(just (A ∧ B)) , snd} (.(A' ⊗ B' , tt) , p2li (f2p (⊗r l {A = A'} {B'} ok eq f g))) ((C' , .(p2li (f2p (∧l₁ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
---   inj₂ ((E , ((A' ⊗ B') , tt) , f2pT (⊗rT l ok eq f g)) ∷ (L , C' , (f2pT (∧l₁T f''))) ∷ (mapList (λ x → L , proj₁ x , f2pT (∧l₁T (proj₂ x))) fs') , refl , tt)
--- check-focus {.(just (A ∧ B)) , snd} (C , p2li (f2p (∧l₁ f))) ((C' , .(p2li (f2p (∧l₁ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
---   inj₁ (inj₁ (A , B , (C , f) ∷ (C' , f'') ∷ fs' , refl , refl))
--- check-focus {.(just (A ∧ B)) , snd} (C , p2li (f2p (∧l₂ f))) ((C' , .(p2li (f2p (∧l₁ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
---   inj₂ ((R , C , f2pT (∧l₂T f)) ∷ (L , C' , f2pT (∧l₁T f'')) ∷ (mapList (λ x → L , proj₁ x , f2pT (∧l₁T (proj₂ x))) fs') , refl , tt)
--- check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , p2li (f2p (∨r₁ l {A = A'} {B'} ok f))) ((C' , .(p2li (f2p (∧l₁ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
---   inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₁T l ok f)) ∷ (L , C' , f2pT (∧l₁T f'')) ∷ (mapList (λ x → L , proj₁ x , f2pT (∧l₁T (proj₂ x))) fs') , refl  , tt)
--- check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , p2li (f2p (∨r₂ l {A = A'} {B'} ok f))) ((C' , .(p2li (f2p (∧l₁ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) =
---   inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₂T l ok f)) ∷ (L , C' , f2pT (∧l₁T f'')) ∷ (mapList (λ x → L , proj₁ x , f2pT (∧l₁T (proj₂ x))) fs') , refl  , tt)
--- check-focus {.(just (A ∧ B)) , snd} (.(A' ⊗ B' , tt) , p2li (f2p (⊗r l {A = A'} {B'} ok eq f g))) ((C' , .(p2li (f2p (∧l₂ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
---   inj₂ ((E , ((A' ⊗ B') , tt) , f2pT (⊗rT l ok eq f g)) ∷ (R , C' , (f2pT (∧l₂T f''))) ∷ (mapList (λ x → R , proj₁ x , f2pT (∧l₂T (proj₂ x))) fs') , refl , tt)
--- check-focus {.(just (A ∧ B)) , snd} (C , p2li (f2p (∧l₁ f))) ((C' , .(p2li (f2p (∧l₂ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
---   inj₂ ((L , C , f2pT (∧l₁T f)) ∷ (R , C' , f2pT (∧l₂T f'')) ∷ (mapList (λ x → R , proj₁ x , f2pT (∧l₂T (proj₂ x))) fs') , refl , tt)
--- check-focus {.(just (A ∧ B)) , snd} (C , p2li (f2p (∧l₂ f))) ((C' , .(p2li (f2p (∧l₂ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) =
---   inj₁ (inj₂ (inj₁ (A , B , (C , f) ∷ (C' , f'') ∷ fs' , refl , refl)))
--- check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , p2li (f2p (∨r₁ l {A = A'} {B'} ok f))) ((C' , .(p2li (f2p (∧l₂ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
---   inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₁T l ok f)) ∷ (R , C' , f2pT (∧l₂T f'')) ∷ (mapList (λ x → R , proj₁ x , f2pT (∧l₂T (proj₂ x))) fs') , refl  , tt)
--- check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , p2li (f2p (∨r₂ l {A = A'} {B'} ok f))) ((C' , .(p2li (f2p (∧l₂ f'')))) ∷ .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
---   inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₂T l ok f)) ∷ (R , C' , f2pT (∧l₂T f'')) ∷ (mapList (λ x → R , proj₁ x , f2pT (∧l₂T (proj₂ x))) fs') , refl  , tt)
--- check-focus {.- , snd} (.(A' ⊗ B' , tt) , p2li (f2p (⊗r l {A = A'} {B'} ok eq f g))) ((C' , .(p2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ' , (.C' , f') ∷ fs' , refl , refl , refl))) = 
---   inj₂ ((E , (A' ⊗ B' , tt) , f2pT (⊗rT l ok eq f g)) ∷ (P , C' , passT f') ∷ (mapList (λ x → P , proj₁ x , passT (proj₂ x)) fs') , refl , tt)
--- check-focus {.- , snd} (.(A' ∨ B' , tt) , p2li (f2p (∨r₁ l {A = A'} {B'} ok f))) ((C' , .(p2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ' , (.C' , f') ∷ fs' , refl , refl , refl))) = 
---   inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₁T l ok f)) ∷ (P , C' , passT f') ∷ (mapList (λ x → P , proj₁ x , passT (proj₂ x)) fs') , refl , tt)
--- check-focus {.- , snd} (.(A' ∨ B' , tt) , p2li (f2p (∨r₂ l {A = A'} {B'} ok f))) ((C' , .(p2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ' , (.C' , f') ∷ fs' , refl , refl , refl))) =
---   inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₂T l ok f)) ∷ (P , C' , passT f') ∷ (mapList (λ x → P , proj₁ x , passT (proj₂ x)) fs') , refl , tt)
--- check-focus {.(just (` X)) , snd} (.(` X , tt) , p2li (f2p (ax {X}))) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
---   inj₂ ((E , (` X , tt) , f2pT ax) ∷ (t , C' , f') ∷ fs' , refl , tt)
--- check-focus {.- , snd} (.(I , tt) , p2li (f2p Ir)) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
---   inj₂ ((E , (I , tt) , f2pT Ir) ∷ (t , C' , f') ∷ fs' , refl , tt)
--- check-focus {S , q} (.(A' ⊗ B' , tt) , p2li (f2p (⊗r l {S = .(irr (S , q)) , p} {A = A'} {B'} ok₁ eq f g))) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) 
---   rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((E , (A' ⊗ B' , tt) , f2pT (⊗rT l ok₁ eq f g)) ∷ (t , C' , f') ∷ fs' , refl , tt)
--- check-focus {.(just (_ ∧ _)) , snd} (C , p2li (f2p (∧l₁ f))) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
---   inj₂ ((L , C , f2pT (∧l₁T f)) ∷ (t , C' , f') ∷ fs' , refl , isOK2isOKL t f' ok)
--- check-focus {.(just (_ ∧ _)) , snd} (C , p2li (f2p (∧l₂ f))) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
---   inj₂ ((R , C , f2pT (∧l₂T f)) ∷ (t , C' , f') ∷ fs' , refl , isOK2isOKR t f' ok)
--- check-focus {S , q} (.(A' ∨ B' , tt) , p2li (f2p (∨r₁ l {S = .(irr (S , q)) , p} {A = A'} {B'} ok₁ f))) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) 
---   rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₁T l ok₁ f)) ∷ (t , C' , f') ∷ fs' , refl , tt)
--- check-focus {S , q} (.(A' ∨ B' , tt) , p2li (f2p (∨r₂ l {S = .(irr (S , q)) , p} {A = A'} {B'} ok₁ f))) ((C' , .(p2li (untagP f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) 
---   rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((E , (A' ∨ B' , tt) , f2pT (∨r₂T l ok₁ f)) ∷ (t , C' , f') ∷ fs' , refl , tt)
+check-focus : {S : Irr} {Γ : Cxt}
+  → (f : Σ Pos (λ C → irr S ∣ Γ ⊢li C))
+  → (fs : List (Σ Pos (λ C → irr S ∣ Γ ⊢li C)))
+  → (Σ Fma (λ A → Σ Fma (λ B → (Σ (List (Σ Pos (λ C → just A ∣ Γ ⊢li C))) (λ fs' → Σ (irr S ≡ just (A ∧ B)) (λ eq →
+      subst (λ x → List (Σ Pos (λ C → x ∣ Γ ⊢li C))) eq (f ∷ fs) ≡ mapList (λ x → f2li' (∧l₁' {B = B} x)) fs')))))
+    ⊎
+    Σ Fma (λ A → Σ Fma (λ B → (Σ (List (Σ Pos (λ C → just B ∣ Γ ⊢li C))) (λ fs' → Σ (irr S ≡ just (A ∧ B)) (λ eq →
+      subst (λ x → List (Σ Pos (λ C → x ∣ Γ ⊢li C))) eq (f ∷ fs) ≡ mapList (λ x → f2li' (∧l₂' {A = A} x)) fs')))))
+    ⊎ 
+    Σ Fma (λ A → Σ Cxt (λ Γ' → Σ (List (Σ Pos (λ C → just A ∣ Γ' ⊢li C))) (λ fs' → Σ (irr S ≡ -) (λ eq1 → Σ (Γ ≡ A ∷ Γ') (λ eq2 
+      → subst₂ (λ x → λ y → List (Σ Pos (λ C → x ∣ y ⊢li C))) eq1 eq2 (f ∷ fs) ≡ mapList (λ x → f2li' (pass' x)) fs'))))))
+    ⊎
+    (Σ (List (Σ Tag (λ t → Σ Pos (λ C → t ∣ S ∣ Γ ⊢fT C)))) (λ fs' → f ∷ fs ≡ mapList (λ x → f2li' (untagF' x)) fs' × isOK (mapList proj₁ fs')))
+check-focus (C , f2li (pass {Γ} {A} f)) [] = inj₁ (inj₂ (inj₂ (A , Γ , (C , f) ∷ [] , refl , refl , refl) ))
+check-focus (C , f2li (pass f)) ((C' , f') ∷ fs) with check-focus (C' , f') fs
+... | inj₁ (inj₂ (inj₂ (A , Γ , (.C' , f'') ∷ fs' , refl , refl , refl))) = inj₁ (inj₂ (inj₂ (A , Γ , (C , f) ∷ (C' , f'') ∷ fs' , refl , refl , refl)))
+... | inj₂ ((t , .C' , f'') ∷ fs' , refl , ok) = inj₂ ((P , C , passT f) ∷ (t , C' , f'') ∷ fs'  , refl , ok)
+check-focus (.(` X , tt) , f2li (ax {X})) [] = inj₂ (((R , ((` X , tt) , ax)) ∷ []) , refl , tt)
+check-focus (.(I , tt) , f2li Ir) [] = inj₂ (((R , (I , tt) , Ir) ∷ []) , (refl , tt))
+check-focus {S , q} (.(A ⊗ B , tt) , f2li (⊗r l {S = .(irr (S , q)) , p} {A = A} {B} ok eq f g)) [] 
+  rewrite irr-eq S p | isIrr-unique S p q = inj₂ (((R , ((A ⊗ B , tt) , (⊗rT l ok eq f g))) ∷ []) , refl , tt)
+check-focus (C , f2li (∧l₁ {A = A} {B} f))[] = inj₁ (inj₁ (A , B , (((C , f) ∷ []) , (refl , refl))))
+check-focus (C , f2li (∧l₂ {A = A} {B} f)) [] = inj₁ (inj₂ (inj₁ (A , (B , (((C , f) ∷ []) , (refl , refl))))))
+check-focus {S , q} (.(A ∨ B , tt) , f2li (∨r₁ l {S = .(irr (S , q)) , p} {A = A} {B} ok f)) [] 
+  rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((R , (A ∨ B , tt) , (∨r₁T l ok f)) ∷ [] , refl , tt)
+check-focus {S , q} (.(A ∨ B , tt) , f2li (∨r₂ l {S = .(irr (S , q)) , p} {A = A} {B} ok f)) [] 
+  rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((R , (A ∨ B , tt) , (∨r₂T l ok f)) ∷ [] , refl , tt)
+check-focus {S} (C , f2li f) ((C' , f') ∷ fs) with check-focus {S} (C' , f') fs
+check-focus {.(just (A ∧ B)) , snd} (.(A' ⊗ B' , tt) , f2li (⊗r l {A = A'} {B'} ok eq f g)) ((C' , .(f2li (∧l₁ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
+  inj₂ ((R , ((A' ⊗ B') , tt) , ⊗rT l ok eq f g) ∷ (C₁ , C' , (∧l₁T f'')) ∷ (mapList (λ x → C₁ , proj₁ x , ∧l₁T (proj₂ x)) fs') , refl , tt)
+check-focus {.(just (A ∧ B)) , snd} (C , f2li (∧l₁ f)) ((C' , .(f2li (∧l₁ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
+  inj₁ (inj₁ (A , B , (C , f) ∷ (C' , f'') ∷ fs' , refl , refl))
+check-focus {.(just (A ∧ B)) , snd} (C , f2li (∧l₂ f)) ((C' , .(f2li (∧l₁ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
+  inj₂ ((C₂ , C , ∧l₂T f) ∷ (C₁ , C' , ∧l₁T f'') ∷ (mapList (λ x → C₁ , proj₁ x , ∧l₁T (proj₂ x)) fs') , refl , tt)
+check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , f2li (∨r₁ l {A = A'} {B'} ok f)) ((C' , .(f2li (∧l₁ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) = 
+  inj₂ ((R , (A' ∨ B' , tt) , ∨r₁T l ok f) ∷ (C₁ , C' , ∧l₁T f'') ∷ (mapList (λ x → C₁ , proj₁ x , ∧l₁T (proj₂ x)) fs') , refl  , tt)
+check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , f2li (∨r₂ l {A = A'} {B'} ok f)) ((C' , .(f2li (∧l₁ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs')) | inj₁ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl)) =
+  inj₂ ((R , (A' ∨ B' , tt) , ∨r₂T l ok f) ∷ (C₁ , C' , ∧l₁T f'') ∷ (mapList (λ x → C₁ , proj₁ x , ∧l₁T (proj₂ x)) fs') , refl  , tt)
+check-focus {.(just (A ∧ B)) , snd} (.(A' ⊗ B' , tt) , f2li (⊗r l {A = A'} {B'} ok eq f g)) ((C' , .(f2li (∧l₂ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
+  inj₂ ((R , ((A' ⊗ B') , tt) , ⊗rT l ok eq f g) ∷ (C₂ , C' , ∧l₂T f'') ∷ (mapList (λ x → C₂ , proj₁ x , ∧l₂T (proj₂ x)) fs') , refl , tt)
+check-focus {.(just (A ∧ B)) , snd} (C , f2li (∧l₁ f)) ((C' , .(f2li (∧l₂ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
+  inj₂ ((C₁ , C , ∧l₁T f) ∷ (C₂ , C' , ∧l₂T f'') ∷ (mapList (λ x → C₂ , proj₁ x , ∧l₂T (proj₂ x)) fs') , refl , tt)
+check-focus {.(just (A ∧ B)) , snd} (C , f2li (∧l₂ f)) ((C' , .(f2li (∧l₂ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) =
+  inj₁ (inj₂ (inj₁ (A , B , (C , f) ∷ (C' , f'') ∷ fs' , refl , refl)))
+check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , f2li (∨r₁ l {A = A'} {B'} ok f)) ((C' , .(f2li (∧l₂ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
+  inj₂ ((R , (A' ∨ B' , tt) , ∨r₁T l ok f) ∷ (C₂ , C' , ∧l₂T f'') ∷ (mapList (λ x → C₂ , proj₁ x , ∧l₂T (proj₂ x)) fs') , refl  , tt)
+check-focus {.(just (A ∧ B)) , snd} (.(A' ∨ B' , tt) , f2li (∨r₂ l {A = A'} {B'} ok f)) ((C' , .(f2li (∧l₂ f''))) ∷ .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs')) | inj₁ (inj₂ (inj₁ (A , B , (.C' , f'') ∷ fs' , refl , refl))) = 
+  inj₂ ((R , (A' ∨ B' , tt) , ∨r₂T l ok f) ∷ (C₂ , C' , ∧l₂T f'') ∷ (mapList (λ x → C₂ , proj₁ x , ∧l₂T (proj₂ x)) fs') , refl  , tt)
+check-focus {.- , snd} ((_ , snd₁) , f2li (pass f)) ((C' , .(f2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ , (.C' , f') ∷ fs' , refl , refl , refl))) = inj₁ (inj₂ (inj₂ (A , Γ , ((_ , snd₁) ,  f) ∷ (C' , f') ∷ fs' , refl , refl , refl)))
+check-focus {.- , snd} ((_ , .tt) , f2li (⊗r l ok eq f g)) ((C' , .(f2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ , (.C' , f') ∷ fs' , refl , refl , refl))) = inj₂ ((R , _ , ⊗rT l ok eq f g) ∷ (P , C' , passT f') ∷ mapList (λ x → P , proj₁ x , passT (proj₂ x)) fs' , refl , tt)
+check-focus {.- , snd} ((_ , .tt) , f2li (∨r₁ l ok f)) ((C' , .(f2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ , (.C' , f') ∷ fs' , refl , refl , refl))) = inj₂ ((R , _ , ∨r₁T l ok f) ∷ (P , C' , passT f') ∷ mapList (λ x → P , proj₁ x , passT (proj₂ x)) fs' , refl , tt)
+check-focus {.- , snd} ((_ , .tt) , f2li (∨r₂ l ok f)) ((C' , .(f2li (pass f'))) ∷ .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs')) | inj₁ (inj₂ (inj₂ (A , Γ , (.C' , f') ∷ fs' , refl , refl , refl))) = inj₂ ((R , _ , ∨r₂T l ok f) ∷ (P , C' , passT f') ∷ mapList (λ x → P , proj₁ x , passT (proj₂ x)) fs' , refl , tt)
+check-focus {.(just (` X)) , snd} (.(` X , tt) , f2li (ax {X})) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
+  inj₂ ((R , (` X , tt) , ax) ∷ (t , C' , f') ∷ fs' , refl , tt)
+check-focus {.- , snd} (.(I , tt) , f2li Ir) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
+  inj₂ ((R , (I , tt) , Ir) ∷ (t , C' , f') ∷ fs' , refl , tt)
+check-focus { - , snd} (C , f2li (pass f)) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , .C' , f') ∷ fs' , refl , snd₂) = inj₂ ((P , C , passT f) ∷ (t , C' , f') ∷ fs' , refl , snd₂)
+check-focus {S , q} (.(A' ⊗ B' , tt) , f2li (⊗r l {S = .(irr (S , q)) , p} {A = A'} {B'} ok₁ eq f g)) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) 
+  rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((R , (A' ⊗ B' , tt) , ⊗rT l ok₁ eq f g) ∷ (t , C' , f') ∷ fs' , refl , tt)
+check-focus {.(just (_ ∧ _)) , snd} (C , f2li (∧l₁ f)) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
+  inj₂ ((C₁ , C , ∧l₁T f) ∷ (t , C' , f') ∷ fs' , refl , isOK2isOKC₁ t f' ok)
+check-focus {.(just (_ ∧ _)) , snd} (C , f2li (∧l₂ f)) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) = 
+  inj₂ ((C₂ , C , ∧l₂T f) ∷ (t , C' , f') ∷ fs' , refl , isOK2isOKC₂ t f' ok)
+check-focus {S , q} (.(A' ∨ B' , tt) , f2li (∨r₁ l {S = .(irr (S , q)) , p} {A = A'} {B'} ok₁ f)) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) 
+  rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((R , (A' ∨ B' , tt) , ∨r₁T l ok₁ f) ∷ (t , C' , f') ∷ fs' , refl , tt)
+check-focus {S , q} (.(A' ∨ B' , tt) , f2li (∨r₂ l {S = .(irr (S , q)) , p} {A = A'} {B'} ok₁ f)) ((C' , .(f2li (untagF f'))) ∷ .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs')) | inj₂ ((t , C' , f') ∷ fs' , refl , ok) 
+  rewrite irr-eq S p | isIrr-unique S p q = inj₂ ((R , (A' ∨ B' , tt) , ∨r₂T l ok₁ f) ∷ (t , C' , f') ∷ fs' , refl , tt)
 
--- gen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
---   → (f : S ∣ Γ ⊢li C)
---   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
---   → SubFmas (pos C ∷ mapList (λ x → pos (proj₁ x)) fs) A
---   → - ∣ Δ ⊢ri B
---   → S ∣ Γ ++ Δ ⊢li (A ⊗ B , _)
--- gen⊗r-li (⊗l f) fs SF g = ⊗l (gen⊗r-li f (⊗l-inv-fs fs) SF g)
--- gen⊗r-li (Il f) fs SF g = Il (gen⊗r-li f (Il-inv-fs fs) SF g)
--- gen⊗r-li (∨l f f') fs SF g = ∨l (gen⊗r-li f (proj₁ (∨l-inv-fs fs)) SF g) (gen⊗r-li f' (proj₂ (∨l-inv-fs fs)) SF g)
--- gen⊗r-li {C = C} (p2li {S} f) fs SF g with check-focus {S} (C , p2li f) fs
--- gen⊗r-li {C = .C'} (p2li {.(just (A ∧ B)) , .tt} (f2p (∧l₁ f))) .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs') SF g | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = p2li (f2p (∧l₁ (gen⊗r-li f fs' SF g)))
--- gen⊗r-li {C = .C'} (p2li {.(just (A ∧ B)) , .tt} (f2p (∧l₂ f))) .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs') SF g | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = p2li (f2p (∧l₂ (gen⊗r-li f fs' SF g)))
--- gen⊗r-li {C = .C'} (p2li {.- , .tt} (pass f)) .(mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs') SF g | inj₁ (inj₂ (inj₂ (A , Γ , (C' , .f) ∷ fs' , refl , refl , refl))) = p2li (pass (gen⊗r-li f fs' SF g))
--- gen⊗r-li {C = .C'} (p2li {.(- , tt)} (pass f)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.P , C' , passT .f) ∷ fs' , refl , ok) = 
---   p2li (f2p (⊗r (P ∷ mapList proj₁ fs') ok refl (∧rT* ((P , C' , passT f) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .(` _ , tt)} (p2li {.(just (` _) , tt)} (f2p ax)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.E , .(` _ , tt) , f2pT ax) ∷ fs' , refl , ok) = 
---   p2li (f2p (⊗r (E ∷ mapList proj₁ fs') ok refl (∧rT* ((E , (` _ , tt) , f2pT ax) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .(I , tt)} (p2li {.(- , tt)} (f2p Ir)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.E , .(I , tt) , f2pT Ir) ∷ fs' , refl , ok) = 
---   p2li (f2p (⊗r (E ∷ mapList proj₁ fs') ok refl (∧rT* ((E , (I , tt) , f2pT Ir) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .(_ ⊗ _ , tt)} (p2li {fst , snd} (f2p (⊗r l ok₁ eq₁ f g₁))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.E , .(_ ⊗ _ , tt) , f2pT (⊗rT .l .ok₁ .eq₁ .f .g₁)) ∷ fs' , refl , ok) = 
---   p2li (f2p (⊗r (E ∷ mapList proj₁ fs') ok refl (∧rT* ((E , (_ ⊗ _ , tt) , f2pT (⊗rT l ok₁ eq₁ f g₁)) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .C'} (p2li {.(just (_ ∧ _) , tt)} (f2p (∧l₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.L , C' , f2pT (∧l₁T .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (⊗r (L ∷ mapList proj₁ fs') ok refl (∧rT* ((L , C' , f2pT (∧l₁T f)) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .C'} (p2li {.(just (_ ∧ _) , tt)} (f2p (∧l₂ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.R , C' , f2pT (∧l₂T .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (⊗r (R ∷ mapList proj₁ fs') ok refl (∧rT* ((R , C' , f2pT (∧l₂T f)) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .(_ ∨ _ , tt)} (p2li {fst , snd} (f2p (∨r₁ l ok₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.E , .(_ ∨ _ , tt) , f2pT (∨r₁T .l .ok₁ .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (⊗r (E ∷ mapList proj₁ fs') ok refl (∧rT* ((E , (_ ∨ _ , tt) , f2pT (∨r₁T l ok₁ f)) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = .(_ ∨ _ , tt)} (p2li {fst , snd} (f2p (∨r₂ l ok₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.E , .(_ ∨ _ , tt) , f2pT (∨r₂T .l .ok₁ .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (⊗r (E ∷ mapList proj₁ fs') ok refl (∧rT* ((E , (_ ∨ _ , tt) , f2pT (∨r₂T l ok₁ f)) ∷ fs') SF refl refl) g))
--- gen⊗r-li {C = ` .X , tt} (p2li {just (` X) , tt} (f2p ax)) fs SF g | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
--- gen⊗r-li {C = ` .X , tt} (p2li {just (` X) , tt} (f2p ax)) fs SF g | inj₁ (inj₂ (inj₂ (A , Γ , fs' , () , eq2 , eq3)))
--- gen⊗r-li {C = .(I , tt)} (p2li {.- , .tt} (f2p Ir)) fs SF g | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
--- gen⊗r-li {C = .(I , tt)} (p2li {.- , .tt} (f2p Ir)) fs SF g | inj₁ (inj₂ (inj₂ (A , Γ , fs' , refl , () , eq)))
--- gen⊗r-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF g | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen⊗r-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF g | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen⊗r-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF g | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen⊗r-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF g | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen⊗r-li {C = A ⊗ B , tt} (p2li {.- , snd} (f2p (⊗r l ok eq f g₁))) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen⊗r-li {C = A ⊗ B , tt} (p2li {.- , snd} (f2p (⊗r l ok eq f g₁))) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
--- gen⊗r-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₁ f))) fs SF g | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
--- gen⊗r-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₁ f))) fs SF g | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
--- gen⊗r-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₂ f))) fs SF g | inj₁ (inj₁ (A , B , [] , refl , ()))
--- gen⊗r-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₂ f))) fs SF g | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF g | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF g | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF g | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF g | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₁ l ok f))) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₁ l ok f))) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF g | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF g | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF g | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF g | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₂ l ok f))) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen⊗r-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₂ l ok f))) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
+  → (f : S ∣ Γ ⊢li C)
+  → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → SubFmas (pos C ∷ mapList (λ x → pos (proj₁ x)) fs) A
+  → - ∣ Δ ⊢ri B
+  → S ∣ Γ ++ Δ ⊢li (A ⊗ B , _)
+gen⊗r-li (⊗l f) fs SF g = ⊗l (gen⊗r-li f (⊗l-inv-fs fs) SF g)
+gen⊗r-li (Il f) fs SF g = Il (gen⊗r-li f (Il-inv-fs fs) SF g)
+gen⊗r-li (∨l f f') fs SF g = ∨l (gen⊗r-li f (proj₁ (∨l-inv-fs fs)) SF g) (gen⊗r-li f' (proj₂ (∨l-inv-fs fs)) SF g)
+gen⊗r-li {C = C} (f2li {S} f) fs SF g with check-focus {S} (C , f2li f) fs
+gen⊗r-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₁ f)) .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs') SF g | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = f2li (∧l₁ (gen⊗r-li f fs' SF g))
+gen⊗r-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₂ f)) .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs') SF g | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = f2li (∧l₂ (gen⊗r-li f fs' SF g))
+gen⊗r-li {C = .C'} (f2li {.- , .tt} (pass f)) .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs') SF g | inj₁ (inj₂ (inj₂ (A , Γ , (C' , .f) ∷ fs' , refl , refl , refl))) = f2li (pass (gen⊗r-li f fs' SF g))
+gen⊗r-li {C = .C'} (f2li {.(- , tt)} (pass f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.P , C' , passT .f) ∷ fs' , refl , ok) = 
+  f2li (⊗r (P ∷ mapList proj₁ fs') ok refl (∧rT* ((P , C' , passT f) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .(` _ , tt)} (f2li {.(just (` _) , tt)} ax) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.R , .(` _ , tt) , ax) ∷ fs' , refl , ok) = 
+  f2li (⊗r (R ∷ mapList proj₁ fs') ok refl (∧rT* ((R , (` _ , tt) , ax) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .(I , tt)} (f2li {.(- , tt)} Ir) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.R , .(I , tt) , Ir) ∷ fs' , refl , ok) = 
+  f2li (⊗r (R ∷ mapList proj₁ fs') ok refl (∧rT* ((R , (I , tt) , Ir) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .(_ ⊗ _ , tt)} (f2li {fst , snd} (⊗r l ok₁ eq₁ f g₁)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.R , .(_ ⊗ _ , tt) , ⊗rT .l .ok₁ .eq₁ .f .g₁) ∷ fs' , refl , ok) = 
+  f2li (⊗r (R ∷ mapList proj₁ fs') ok refl (∧rT* ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ eq₁ f g₁)) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .C'} (f2li {.(just (_ ∧ _) , tt)} (∧l₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.C₁ , C' , (∧l₁T .f)) ∷ fs' , refl , ok) =
+  f2li (⊗r (C₁ ∷ mapList proj₁ fs') ok refl (∧rT* ((C₁ , C' , (∧l₁T f)) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .C'} (f2li {.(just (_ ∧ _) , tt)} (∧l₂ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.C₂ , C' , (∧l₂T .f)) ∷ fs' , refl , ok) =
+  f2li (⊗r (C₂ ∷ mapList proj₁ fs') ok refl (∧rT* ((C₂ , C' , (∧l₂T f)) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .(_ ∨ _ , tt)} (f2li {fst , snd} (∨r₁ l ok₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.R , .(_ ∨ _ , tt) , (∨r₁T .l .ok₁ .f)) ∷ fs' , refl , ok) =
+  f2li (⊗r (R ∷ mapList proj₁ fs') ok refl (∧rT* ((R , (_ ∨ _ , tt) , (∨r₁T l ok₁ f)) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = .(_ ∨ _ , tt)} (f2li {fst , snd} (∨r₂ l ok₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF g | inj₂ ((.R , .(_ ∨ _ , tt) , (∨r₂T .l .ok₁ .f)) ∷ fs' , refl , ok) =
+  f2li (⊗r (R ∷ mapList proj₁ fs') ok refl (∧rT* ((R , (_ ∨ _ , tt) , (∨r₂T l ok₁ f)) ∷ fs') SF refl refl) g)
+gen⊗r-li {C = ` .X , tt} (f2li {just (` X) , tt} ax) fs SF g | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
+gen⊗r-li {C = ` .X , tt} (f2li {just (` X) , tt} ax) fs SF g | inj₁ (inj₂ (inj₂ (A , Γ , fs' , () , eq2 , eq3)))
+gen⊗r-li {C = .(I , tt)} (f2li {.- , .tt} Ir) fs SF g | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
+gen⊗r-li {C = .(I , tt)} (f2li {.- , .tt} Ir) fs SF g | inj₁ (inj₂ (inj₂ (A , Γ , fs' , refl , () , eq)))
+gen⊗r-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF g | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen⊗r-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF g | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen⊗r-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF g | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen⊗r-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF g | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen⊗r-li {C = A ⊗ B , tt} (f2li {.- , snd} (⊗r l ok eq f g₁)) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen⊗r-li {C = A ⊗ B , tt} (f2li {.- , snd} (⊗r l ok eq f g₁)) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen⊗r-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₁ f)) fs SF g | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
+gen⊗r-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₁ f)) fs SF g | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
+gen⊗r-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₂ f)) fs SF g | inj₁ (inj₁ (A , B , [] , refl , ()))
+gen⊗r-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₂ f)) fs SF g | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF g | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF g | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF g | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF g | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₁ l ok f)) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₁ l ok f)) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF g | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF g | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF g | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF g | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₂ l ok f)) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen⊗r-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₂ l ok f)) fs SF g | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
 
--- gen∨r₁-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
---   → (f : S ∣ Γ ⊢li C)
---   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
---   → SubFmas (pos C ∷ mapList (λ x → pos (proj₁ x)) fs) A
---   → S ∣ Γ ⊢li (A ∨ B , _)
--- gen∨r₁-li (⊗l f) fs SF = ⊗l (gen∨r₁-li f (⊗l-inv-fs fs) SF)
--- gen∨r₁-li (Il f) fs SF = Il (gen∨r₁-li f (Il-inv-fs fs) SF)
--- gen∨r₁-li (∨l f f') fs SF = ∨l (gen∨r₁-li f (proj₁ (∨l-inv-fs fs)) SF) (gen∨r₁-li f' (proj₂ (∨l-inv-fs fs)) SF)
--- gen∨r₁-li {C = C} (p2li {S} f) fs SF with check-focus {S} (C , p2li f) fs
--- gen∨r₁-li {C = .C'} (p2li {.(just (A ∧ B)) , .tt} (f2p (∧l₁ f))) .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs') SF | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = p2li (f2p (∧l₁ (gen∨r₁-li f fs' SF)))
--- gen∨r₁-li {C = .C'} (p2li {.(just (A ∧ B)) , .tt} (f2p (∧l₂ f))) .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs') SF | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = p2li (f2p (∧l₂ (gen∨r₁-li f fs' SF)))
--- gen∨r₁-li {C = .C'} (p2li {.- , .tt} (pass f)) .(mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs') SF | inj₁ (inj₂ (inj₂ (A , Γ , (C' , .f) ∷ fs' , refl , refl , refl))) = p2li (pass (gen∨r₁-li f fs' SF))
--- gen∨r₁-li {C = .C'} (p2li {.(- , tt)} (pass f)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.P , C' , passT .f) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₁ (P ∷ mapList proj₁ fs') ok (∧rT* ((P , C' , passT f) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .(` _ , tt)} (p2li {.(just (` _) , tt)} (f2p ax)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(` _ , tt) , f2pT ax) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₁ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (` _ , tt) , f2pT ax) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .(I , tt)} (p2li {.(- , tt)} (f2p Ir)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(I , tt) , f2pT Ir) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₁ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (I , tt) , f2pT Ir) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .(_ ⊗ _ , tt)} (p2li {fst , snd} (f2p (⊗r l ok₁ eq₁ f g₁))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(_ ⊗ _ , tt) , f2pT (⊗rT .l .ok₁ .eq₁ .f .g₁)) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₁ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (_ ⊗ _ , tt) , f2pT (⊗rT l ok₁ eq₁ f g₁)) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .C'} (p2li {.(just (_ ∧ _) , tt)} (f2p (∧l₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.L , C' , f2pT (∧l₁T .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₁ (L ∷ mapList proj₁ fs') ok (∧rT* ((L , C' , f2pT (∧l₁T f)) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .C'} (p2li {.(just (_ ∧ _) , tt)} (f2p (∧l₂ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , C' , f2pT (∧l₂T .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₁ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , C' , f2pT (∧l₂T f)) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .(_ ∨ _ , tt)} (p2li {fst , snd} (f2p (∨r₁ l ok₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(_ ∨ _ , tt) , f2pT (∨r₁T .l .ok₁ .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₁ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (_ ∨ _ , tt) , f2pT (∨r₁T l ok₁ f)) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = .(_ ∨ _ , tt)} (p2li {fst , snd} (f2p (∨r₂ l ok₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(_ ∨ _ , tt) , f2pT (∨r₂T .l .ok₁ .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₁ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (_ ∨ _ , tt) , f2pT (∨r₂T l ok₁ f)) ∷ fs') SF refl refl)))
--- gen∨r₁-li {C = ` .X , tt} (p2li {just (` X) , tt} (f2p ax)) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
--- gen∨r₁-li {C = ` .X , tt} (p2li {just (` X) , tt} (f2p ax)) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , () , eq2 , eq3)))
--- gen∨r₁-li {C = .(I , tt)} (p2li {.- , .tt} (f2p Ir)) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
--- gen∨r₁-li {C = .(I , tt)} (p2li {.- , .tt} (f2p Ir)) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , refl , () , eq)))
--- gen∨r₁-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen∨r₁-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₁-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen∨r₁-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₁-li {C = A ⊗ B , tt} (p2li {.- , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen∨r₁-li {C = A ⊗ B , tt} (p2li {.- , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
--- gen∨r₁-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₁ f))) fs SF | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
--- gen∨r₁-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₁ f))) fs SF | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₁-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₂ f))) fs SF | inj₁ (inj₁ (A , B , [] , refl , ()))
--- gen∨r₁-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₂ f))) fs SF | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen∨r₁-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen∨r₁-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
+  → (f : S ∣ Γ ⊢li C)
+  → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → SubFmas (pos C ∷ mapList (λ x → pos (proj₁ x)) fs) A
+  → S ∣ Γ ⊢li (A ∨ B , _)
+gen∨r₁-li (⊗l f) fs SF = ⊗l (gen∨r₁-li f (⊗l-inv-fs fs) SF)
+gen∨r₁-li (Il f) fs SF = Il (gen∨r₁-li f (Il-inv-fs fs) SF)
+gen∨r₁-li (∨l f f') fs SF = ∨l (gen∨r₁-li f (proj₁ (∨l-inv-fs fs)) SF) (gen∨r₁-li f' (proj₂ (∨l-inv-fs fs)) SF)
+gen∨r₁-li {C = C} (f2li {S} f) fs SF with check-focus {S} (C , f2li f) fs
+gen∨r₁-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₁ f)) .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs') SF | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = f2li (∧l₁ (gen∨r₁-li f fs' SF))
+gen∨r₁-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₂ f)) .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs') SF | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = f2li (∧l₂ (gen∨r₁-li f fs' SF))
+gen∨r₁-li {C = .C'} (f2li {.- , .tt} (pass f)) .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs') SF | inj₁ (inj₂ (inj₂ (A , Γ , (C' , .f) ∷ fs' , refl , refl , refl))) = f2li (pass (gen∨r₁-li f fs' SF))
+gen∨r₁-li {C = .C'} (f2li {.(- , tt)} (pass f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.P , C' , passT .f) ∷ fs' , refl , ok) = 
+  f2li (∨r₁ (P ∷ mapList proj₁ fs') ok (∧rT* ((P , C' , passT f) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .(` _ , tt)} (f2li {.(just (` _) , tt)} ax) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(` _ , tt) , ax) ∷ fs' , refl , ok) = 
+  f2li (∨r₁ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (` _ , tt) , ax) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .(I , tt)} (f2li {.(- , tt)} Ir) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(I , tt) , Ir) ∷ fs' , refl , ok) = 
+  f2li (∨r₁ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (I , tt) , Ir) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .(_ ⊗ _ , tt)} (f2li {fst , snd} (⊗r l ok₁ eq₁ f g₁)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT .l .ok₁ .eq₁ .f .g₁)) ∷ fs' , refl , ok) = 
+  f2li (∨r₁ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ eq₁ f g₁)) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .C'} (f2li {.(just (_ ∧ _) , tt)} (∧l₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.C₁ , C' , (∧l₁T .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₁ (C₁ ∷ mapList proj₁ fs') ok (∧rT* ((C₁ , C' , (∧l₁T f)) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .C'} (f2li {.(just (_ ∧ _) , tt)} (∧l₂ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.C₂ , C' , (∧l₂T .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₁ (C₂ ∷ mapList proj₁ fs') ok (∧rT* ((C₂ , C' , (∧l₂T f)) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .(_ ∨ _ , tt)} (f2li {fst , snd} (∨r₁ l ok₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(_ ∨ _ , tt) , (∨r₁T .l .ok₁ .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₁ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (_ ∨ _ , tt) , (∨r₁T l ok₁ f)) ∷ fs') SF refl refl))
+gen∨r₁-li {C = .(_ ∨ _ , tt)} (f2li {fst , snd} (∨r₂ l ok₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(_ ∨ _ , tt) , (∨r₂T .l .ok₁ .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₁ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (_ ∨ _ , tt) , (∨r₂T l ok₁ f)) ∷ fs') SF refl refl))
+gen∨r₁-li {C = ` .X , tt} (f2li {just (` X) , tt} ax) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
+gen∨r₁-li {C = ` .X , tt} (f2li {just (` X) , tt} ax) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , () , eq2 , eq3)))
+gen∨r₁-li {C = .(I , tt)} (f2li {.- , .tt} Ir) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
+gen∨r₁-li {C = .(I , tt)} (f2li {.- , .tt} Ir) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , refl , () , eq)))
+gen∨r₁-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen∨r₁-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen∨r₁-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen∨r₁-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen∨r₁-li {C = A ⊗ B , tt} (f2li {.- , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen∨r₁-li {C = A ⊗ B , tt} (f2li {.- , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen∨r₁-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₁ f)) fs SF | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
+gen∨r₁-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₁ f)) fs SF | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
+gen∨r₁-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₂ f)) fs SF | inj₁ (inj₁ (A , B , [] , refl , ()))
+gen∨r₁-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₂ f)) fs SF | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen∨r₁-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
 
--- gen∨r₂-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
---   → (f : S ∣ Γ ⊢li C)
---   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
---   → SubFmas (pos C ∷ mapList (λ x → pos (proj₁ x)) fs) B
---   → S ∣ Γ ⊢li (A ∨ B , _)
--- gen∨r₂-li (⊗l f) fs SF = ⊗l (gen∨r₂-li f (⊗l-inv-fs fs) SF)
--- gen∨r₂-li (Il f) fs SF = Il (gen∨r₂-li f (Il-inv-fs fs) SF)
--- gen∨r₂-li (∨l f f') fs SF = ∨l (gen∨r₂-li f (proj₁ (∨l-inv-fs fs)) SF) (gen∨r₂-li f' (proj₂ (∨l-inv-fs fs)) SF)
--- gen∨r₂-li {C = C} (p2li {S} f) fs SF with check-focus {S} (C , p2li f) fs
--- gen∨r₂-li {C = .C'} (p2li {.(just (A ∧ B)) , .tt} (f2p (∧l₁ f))) .(mapList (λ x → proj₁ x , p2li (f2p (∧l₁ (proj₂ x)))) fs') SF | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = p2li (f2p (∧l₁ (gen∨r₂-li f fs' SF)))
--- gen∨r₂-li {C = .C'} (p2li {.(just (A ∧ B)) , .tt} (f2p (∧l₂ f))) .(mapList (λ x → proj₁ x , p2li (f2p (∧l₂ (proj₂ x)))) fs') SF | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = p2li (f2p (∧l₂ (gen∨r₂-li f fs' SF)))
--- gen∨r₂-li {C = .C'} (p2li {.- , .tt} (pass f)) .(mapList (λ x → proj₁ x , p2li (pass (proj₂ x))) fs') SF | inj₁ (inj₂ (inj₂ (A , Γ , (C' , .f) ∷ fs' , refl , refl , refl))) = p2li (pass (gen∨r₂-li f fs' SF))
--- gen∨r₂-li {C = .C'} (p2li {.(- , tt)} (pass f)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.P , C' , passT .f) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₂ (P ∷ mapList proj₁ fs') ok (∧rT* ((P , C' , passT f) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .(` _ , tt)} (p2li {.(just (` _) , tt)} (f2p ax)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(` _ , tt) , f2pT ax) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₂ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (` _ , tt) , f2pT ax) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .(I , tt)} (p2li {.(- , tt)} (f2p Ir)) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(I , tt) , f2pT Ir) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₂ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (I , tt) , f2pT Ir) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .(_ ⊗ _ , tt)} (p2li {fst , snd} (f2p (⊗r l ok₁ eq₁ f g₁))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(_ ⊗ _ , tt) , f2pT (⊗rT .l .ok₁ .eq₁ .f .g₁)) ∷ fs' , refl , ok) = 
---   p2li (f2p (∨r₂ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (_ ⊗ _ , tt) , f2pT (⊗rT l ok₁ eq₁ f g₁)) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .C'} (p2li {.(just (_ ∧ _) , tt)} (f2p (∧l₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.L , C' , f2pT (∧l₁T .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₂ (L ∷ mapList proj₁ fs') ok (∧rT* ((L , C' , f2pT (∧l₁T f)) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .C'} (p2li {.(just (_ ∧ _) , tt)} (f2p (∧l₂ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , C' , f2pT (∧l₂T .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₂ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , C' , f2pT (∧l₂T f)) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .(_ ∨ _ , tt)} (p2li {fst , snd} (f2p (∨r₁ l ok₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(_ ∨ _ , tt) , f2pT (∨r₁T .l .ok₁ .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₂ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (_ ∨ _ , tt) , f2pT (∨r₁T l ok₁ f)) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = .(_ ∨ _ , tt)} (p2li {fst , snd} (f2p (∨r₂ l ok₁ f))) .(mapList (λ x → proj₁ (proj₂ x) , p2li (untagP (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.E , .(_ ∨ _ , tt) , f2pT (∨r₂T .l .ok₁ .f)) ∷ fs' , refl , ok) =
---   p2li (f2p (∨r₂ (E ∷ mapList proj₁ fs') ok (∧rT* ((E , (_ ∨ _ , tt) , f2pT (∨r₂T l ok₁ f)) ∷ fs') SF refl refl)))
--- gen∨r₂-li {C = ` .X , tt} (p2li {just (` X) , tt} (f2p ax)) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
--- gen∨r₂-li {C = ` .X , tt} (p2li {just (` X) , tt} (f2p ax)) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , () , eq2 , eq3)))
--- gen∨r₂-li {C = .(I , tt)} (p2li {.- , .tt} (f2p Ir)) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
--- gen∨r₂-li {C = .(I , tt)} (p2li {.- , .tt} (f2p Ir)) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , refl , () , eq)))
--- gen∨r₂-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen∨r₂-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₂-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen∨r₂-li {C = A ⊗ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₂-li {C = A ⊗ B , tt} (p2li {.- , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen∨r₂-li {C = A ⊗ B , tt} (p2li {.- , snd} (f2p (⊗r l ok eq f g₁))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
--- gen∨r₂-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₁ f))) fs SF | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
--- gen∨r₂-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₁ f))) fs SF | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₂-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₂ f))) fs SF | inj₁ (inj₁ (A , B , [] , refl , ()))
--- gen∨r₂-li {C = C} (p2li {just (A ∧ B) , tt} (f2p (∧l₂ f))) fs SF | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₁ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.(just (A' ∧ B')) , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
--- gen∨r₂-li {C = A ∨ B , tt} (p2li {.- , snd} (f2p (∨r₂ l ok f))) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
-
-
--- fsDist-white : {S : Stp} {Γ : Cxt} {A B : Fma}
---   → (Φ Ψ : List Fma) (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (eq : A ∷ Φ ++ B ∷ Ψ ≡ mapList (λ x → pos (proj₁ x)) fs)
---   → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs' → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs'' 
---     → fs ≡ fs' ++ fs'' × A ∷ Φ ≡ mapList (λ x → pos (proj₁ x)) fs' × B ∷ Ψ ≡ mapList (λ x → pos (proj₁ x)) fs''))
--- fsDist-white [] [] (x ∷ x₁ ∷ []) refl = x ∷ [] , x₁ ∷ [] , refl , refl , refl
--- fsDist-white [] (x₁ ∷ Ψ) (x ∷ fs) eq with fsDist-white [] Ψ fs (proj₂ (inj∷ eq))
--- ... | x₂ ∷ [] , x₃ ∷ fs'' , refl , refl , refl = x ∷ [] , x₂ ∷ x₃ ∷ fs'' , refl , cong (λ x → x ∷ []) (proj₁ (inj∷ eq)) , refl
--- fsDist-white (x₁ ∷ Φ) Ψ (x ∷ fs) eq with fsDist-white Φ Ψ fs (proj₂ (inj∷ eq))
--- ... | x₂ ∷ fs' , x₃ ∷ fs'' , refl , refl , refl = x ∷ x₂ ∷ fs' , x₃ ∷ fs'' , refl , cong (λ x → x ∷ proj₁ (proj₁ x₂) ∷ mapList (λ x₄ → proj₁ (proj₁ x₄)) fs') (proj₁ (inj∷ eq)) , refl
+gen∨r₂-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
+  → (f : S ∣ Γ ⊢li C)
+  → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → SubFmas (pos C ∷ mapList (λ x → pos (proj₁ x)) fs) B
+  → S ∣ Γ ⊢li (A ∨ B , _)
+gen∨r₂-li (⊗l f) fs SF = ⊗l (gen∨r₂-li f (⊗l-inv-fs fs) SF)
+gen∨r₂-li (Il f) fs SF = Il (gen∨r₂-li f (Il-inv-fs fs) SF)
+gen∨r₂-li (∨l f f') fs SF = ∨l (gen∨r₂-li f (proj₁ (∨l-inv-fs fs)) SF) (gen∨r₂-li f' (proj₂ (∨l-inv-fs fs)) SF)
+gen∨r₂-li {C = C} (f2li {S} f) fs SF with check-focus {S} (C , f2li f) fs
+gen∨r₂-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₁ f)) .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs') SF | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = f2li (∧l₁ (gen∨r₂-li f fs' SF))
+gen∨r₂-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₂ f)) .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs') SF | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = f2li (∧l₂ (gen∨r₂-li f fs' SF))
+gen∨r₂-li {C = .C'} (f2li {.- , .tt} (pass f)) .(mapList (λ x → proj₁ x , f2li (pass (proj₂ x))) fs') SF | inj₁ (inj₂ (inj₂ (A , Γ , (C' , .f) ∷ fs' , refl , refl , refl))) = f2li (pass (gen∨r₂-li f fs' SF))
+gen∨r₂-li {C = .C'} (f2li {.(- , tt)} (pass f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.P , C' , passT .f) ∷ fs' , refl , ok) = 
+  f2li (∨r₂ (P ∷ mapList proj₁ fs') ok (∧rT* ((P , C' , passT f) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .(` _ , tt)} (f2li {.(just (` _) , tt)} ax) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(` _ , tt) , ax) ∷ fs' , refl , ok) = 
+  f2li (∨r₂ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (` _ , tt) , ax) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .(I , tt)} (f2li {.(- , tt)} Ir) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(I , tt) , Ir) ∷ fs' , refl , ok) = 
+  f2li (∨r₂ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (I , tt) , Ir) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .(_ ⊗ _ , tt)} (f2li {fst , snd} (⊗r l ok₁ eq₁ f g₁)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(_ ⊗ _ , tt) , (⊗rT .l .ok₁ .eq₁ .f .g₁)) ∷ fs' , refl , ok) = 
+  f2li (∨r₂ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (_ ⊗ _ , tt) , (⊗rT l ok₁ eq₁ f g₁)) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .C'} (f2li {.(just (_ ∧ _) , tt)} (∧l₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.C₁ , C' , (∧l₁T .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₂ (C₁ ∷ mapList proj₁ fs') ok (∧rT* ((C₁ , C' , (∧l₁T f)) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .C'} (f2li {.(just (_ ∧ _) , tt)} (∧l₂ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.C₂ , C' , (∧l₂T .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₂ (C₂ ∷ mapList proj₁ fs') ok (∧rT* ((C₂ , C' , (∧l₂T f)) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .(_ ∨ _ , tt)} (f2li {fst , snd} (∨r₁ l ok₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(_ ∨ _ , tt) , (∨r₁T .l .ok₁ .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₂ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (_ ∨ _ , tt) , (∨r₁T l ok₁ f)) ∷ fs') SF refl refl))
+gen∨r₂-li {C = .(_ ∨ _ , tt)} (f2li {fst , snd} (∨r₂ l ok₁ f)) .(mapList (λ x → proj₁ (proj₂ x) , f2li (untagF (proj₂ (proj₂ x)))) fs') SF | inj₂ ((.R , .(_ ∨ _ , tt) , (∨r₂T .l .ok₁ .f)) ∷ fs' , refl , ok) =
+  f2li (∨r₂ (R ∷ mapList proj₁ fs') ok (∧rT* ((R , (_ ∨ _ , tt) , (∨r₂T l ok₁ f)) ∷ fs') SF refl refl))
+gen∨r₂-li {C = ` .X , tt} (f2li {just (` X) , tt} ax) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
+gen∨r₂-li {C = ` .X , tt} (f2li {just (` X) , tt} ax) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , () , eq2 , eq3)))
+gen∨r₂-li {C = .(I , tt)} (f2li {.- , .tt} Ir) fs SF | inj₁ (inj₂ (inj₁ (A , B , fs' , () , eq)))
+gen∨r₂-li {C = .(I , tt)} (f2li {.- , .tt} Ir) fs SF | inj₁ (inj₂ (inj₂ (A , Γ , fs' , refl , () , eq)))
+gen∨r₂-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen∨r₂-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen∨r₂-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen∨r₂-li {C = A ⊗ B , tt} (f2li {.(just (A' ∧ B')) , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen∨r₂-li {C = A ⊗ B , tt} (f2li {.- , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen∨r₂-li {C = A ⊗ B , tt} (f2li {.- , snd} (⊗r l ok eq f g₁)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen∨r₂-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₁ f)) fs SF | inj₁ (inj₂ (inj₁ (A , B , [] , refl , ())))
+gen∨r₂-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₁ f)) fs SF | inj₁ (inj₂ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ())))
+gen∨r₂-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₂ f)) fs SF | inj₁ (inj₁ (A , B , [] , refl , ()))
+gen∨r₂-li {C = C} (f2li {just (A ∧ B) , tt} (∧l₂ f)) fs SF | inj₁ (inj₁ (A , B , (C' , f') ∷ fs' , refl , ()))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₁ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , [] , refl , ()))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ()))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₁(A' , B' , [] , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.(just (A' ∧ B')) , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₁ (A' , B' , (C' , f') ∷ fs' , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , [] , refl , refl , ())))
+gen∨r₂-li {C = A ∨ B , tt} (f2li {.- , snd} (∨r₂ l ok f)) fs SF | inj₁ (inj₂ (inj₂ (A' , Γ , (C' , f') ∷ fs' , refl , refl , ())))
 
 
--- ∧r* : {S : Stp} {Γ : Cxt} {A : Fma}
---   → {Φ : List Fma}
---   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
---   → (SF : SubFmas Φ A)
---   → (eq : Φ ≡ mapList (λ x → pos (proj₁ x)) fs)
---   → S ∣ Γ ⊢ri A
--- ∧r* ((C , f) ∷ fs) (conj {Φ} {Ψ} SF SF₁) eq with fsDist-white Φ Ψ ((C , f) ∷ fs) eq
--- ... | .(C , f) ∷ fs' , (C' , f') ∷ fs'' , refl , refl , refl = ∧r (∧r* ((C , f) ∷ fs') SF refl) (∧r* ((C' , f') ∷ fs'') SF₁ refl)
--- ∧r* ((C , f) ∷ []) stop refl = li2ri f
+fsDist-white : {S : Stp} {Γ : Cxt} {A B : Fma}
+  → (Φ Ψ : List Fma) (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (eq : A ∷ Φ ++ B ∷ Ψ ≡ mapList (λ x → pos (proj₁ x)) fs)
+  → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs' → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs'' 
+    → fs ≡ fs' ++ fs'' × A ∷ Φ ≡ mapList (λ x → pos (proj₁ x)) fs' × B ∷ Ψ ≡ mapList (λ x → pos (proj₁ x)) fs''))
+fsDist-white [] [] (x ∷ x₁ ∷ []) refl = x ∷ [] , x₁ ∷ [] , refl , refl , refl
+fsDist-white [] (x₁ ∷ Ψ) (x ∷ fs) eq with fsDist-white [] Ψ fs (proj₂ (inj∷ eq))
+... | x₂ ∷ [] , x₃ ∷ fs'' , refl , refl , refl = x ∷ [] , x₂ ∷ x₃ ∷ fs'' , refl , cong (λ x → x ∷ []) (proj₁ (inj∷ eq)) , refl
+fsDist-white (x₁ ∷ Φ) Ψ (x ∷ fs) eq with fsDist-white Φ Ψ fs (proj₂ (inj∷ eq))
+... | x₂ ∷ fs' , x₃ ∷ fs'' , refl , refl , refl = x ∷ x₂ ∷ fs' , x₃ ∷ fs'' , refl , cong (λ x → x ∷ proj₁ (proj₁ x₂) ∷ mapList (λ x₄ → proj₁ (proj₁ x₄)) fs') (proj₁ (inj∷ eq)) , refl
 
--- fsDist-white-refl : (S : Stp) (Γ : Cxt) {A B : Pos}
---   → {f : S ∣ Γ ⊢li A} {g : S ∣ Γ ⊢li B}
---   → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
---   → (gs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
---   → fsDist-white ((mapList (λ z → proj₁ (proj₁ z)) fs)) ((mapList (λ z → proj₁ (proj₁ z)) gs)) ((A , f) ∷ fs ++ (B , g) ∷ gs) refl ≡ ((A , f) ∷ fs , (B , g) ∷ gs , refl , refl , refl)
--- fsDist-white-refl S Γ [] [] = refl
--- fsDist-white-refl S Γ {B = B} {g = g} [] ((C , h) ∷ gs) with fsDist-white [] (mapList (λ z → proj₁ (proj₁ z)) gs) ((B , g) ∷ (C , h) ∷ gs) refl
--- ... | .(B , g) ∷ [] , .(C , h) ∷ .gs , refl , refl , refl = refl
--- fsDist-white-refl S Γ {A} {B} {f} {g} ((A' , f') ∷ fs) gs 
---   rewrite fsDist-white-refl S Γ {A'} {B} {f'} {g} fs gs = refl
--- {-# REWRITE fsDist-white-refl #-}
 
--- f2fs : {S : Stp} {Γ : Cxt} {A : Fma}
---   → (f : S ∣ Γ ⊢ri A)
---   → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs → Σ (List Fma) (λ Φ → Σ (Φ ≡ mapList (λ x → pos (proj₁ x)) fs) (λ eq → Σ (SubFmas Φ A) (λ SF → f ≡ ∧r* fs SF eq))))
--- f2fs {S} {Γ} (∧r f g) with f2fs f | f2fs g
--- ... | ((A , snd) , f') ∷ fs , .A ∷ .(mapList (λ x → proj₁ (proj₁ x)) fs) , refl , SF1 , refl | ((B , snd₁) , g') ∷ gs , .B ∷ .(mapList (λ x → proj₁ (proj₁ x)) gs) , refl , SF2 , refl = 
---   ((A , snd) , f') ∷ fs ++ ((B , snd₁) , g') ∷ gs , A ∷ (mapList (λ x → proj₁ (proj₁ x)) fs) ++ B ∷ (mapList (λ x → proj₁ (proj₁ x)) gs) , refl , conj SF1 SF2 , refl
--- f2fs (li2ri {C = C} f) = (C , f) ∷ [] , pos C ∷ [] , refl , stop , refl
+∧r* : {S : Stp} {Γ : Cxt} {A : Fma}
+  → {Φ : List Fma}
+  → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → (SF : SubFmas Φ A)
+  → (eq : Φ ≡ mapList (λ x → pos (proj₁ x)) fs)
+  → S ∣ Γ ⊢ri A
+∧r* ((C , f) ∷ fs) (conj {Φ} {Ψ} SF SF₁) eq with fsDist-white Φ Ψ ((C , f) ∷ fs) eq
+... | .(C , f) ∷ fs' , (C' , f') ∷ fs'' , refl , refl , refl = ∧r (∧r* ((C , f) ∷ fs') SF refl) (∧r* ((C' , f') ∷ fs'') SF₁ refl)
+∧r* ((C , f) ∷ []) stop refl = li2ri f
 
--- f2fs-refl : {S : Stp} {Γ : Cxt} {A : Fma}
---   → {Φ : List Fma}
---   → (fs : List (Σ Pos (_∣_⊢li_ S Γ)))
---   → (SF : SubFmas Φ A)
---   → (eq : Φ ≡ (mapList (λ x → proj₁ (proj₁ x)) fs))
---   → f2fs (∧r* fs SF eq) ≡ (fs , Φ , eq , SF , refl)
--- f2fs-refl {S} {Γ} fs (conj {Φ} {Ψ} SF1 SF2) eq with fsDist-white Φ Ψ fs eq
--- f2fs-refl {S} {Γ} .(((C , f) ∷ fs') ++ (C' , f') ∷ fs'') (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs')} {.(mapList (λ x → proj₁ (proj₁ x)) fs'')} SF1 SF2) refl | (C , f) ∷ fs' , (C' , f') ∷ fs'' , refl , refl , refl 
---   rewrite f2fs-refl ((C , f) ∷ fs') SF1 refl | f2fs-refl ((C' , f') ∷ fs'') SF2 refl = refl
--- f2fs-refl (x ∷ []) stop refl = refl
+fsDist-white-refl : (S : Stp) (Γ : Cxt) {A B : Pos}
+  → {f : S ∣ Γ ⊢li A} {g : S ∣ Γ ⊢li B}
+  → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → (gs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → fsDist-white ((mapList (λ z → proj₁ (proj₁ z)) fs)) ((mapList (λ z → proj₁ (proj₁ z)) gs)) ((A , f) ∷ fs ++ (B , g) ∷ gs) refl ≡ ((A , f) ∷ fs , (B , g) ∷ gs , refl , refl , refl)
+fsDist-white-refl S Γ [] [] = refl
+fsDist-white-refl S Γ {B = B} {g = g} [] ((C , h) ∷ gs) with fsDist-white [] (mapList (λ z → proj₁ (proj₁ z)) gs) ((B , g) ∷ (C , h) ∷ gs) refl
+... | .(B , g) ∷ [] , .(C , h) ∷ .gs , refl , refl , refl = refl
+fsDist-white-refl S Γ {A} {B} {f} {g} ((A' , f') ∷ fs) gs 
+  rewrite fsDist-white-refl S Γ {A'} {B} {f'} {g} fs gs = refl
+{-# REWRITE fsDist-white-refl #-}
 
--- ⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
---   → (f : S ∣ Γ ⊢ri A)
---   → (g : - ∣ Δ ⊢ri B)
---   → S ∣ Γ ++ Δ ⊢ri A ⊗ B
--- ⊗r-ri {A = A} f g with f2fs f
--- ... | (C , f₁) ∷ fs , .(mapList (λ x → proj₁ (proj₁ x)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen⊗r-li f₁ fs SF g)
+f2fs : {S : Stp} {Γ : Cxt} {A : Fma}
+  → (f : S ∣ Γ ⊢ri A)
+  → Σ (List (Σ Pos (λ C → S ∣ Γ ⊢li C))) (λ fs → Σ (List Fma) (λ Φ → Σ (Φ ≡ mapList (λ x → pos (proj₁ x)) fs) (λ eq → Σ (SubFmas Φ A) (λ SF → f ≡ ∧r* fs SF eq))))
+f2fs {S} {Γ} (∧r f g) with f2fs f | f2fs g
+... | ((A , snd) , f') ∷ fs , .A ∷ .(mapList (λ x → proj₁ (proj₁ x)) fs) , refl , SF1 , refl | ((B , snd₁) , g') ∷ gs , .B ∷ .(mapList (λ x → proj₁ (proj₁ x)) gs) , refl , SF2 , refl = 
+  ((A , snd) , f') ∷ fs ++ ((B , snd₁) , g') ∷ gs , A ∷ (mapList (λ x → proj₁ (proj₁ x)) fs) ++ B ∷ (mapList (λ x → proj₁ (proj₁ x)) gs) , refl , conj SF1 SF2 , refl
+f2fs (li2ri {C = C} f) = (C , f) ∷ [] , pos C ∷ [] , refl , stop , refl
 
--- ∨r₁-ri : {S : Stp} {Γ : Cxt} {A B : Fma}
---   → (f : S ∣ Γ ⊢ri A)
---   → S ∣ Γ ⊢ri A ∨ B
--- ∨r₁-ri f with f2fs f
--- ... | (C , f₁) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ x₁)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen∨r₁-li f₁ fs SF)
+f2fs-refl : {S : Stp} {Γ : Cxt} {A : Fma}
+  → {Φ : List Fma}
+  → (fs : List (Σ Pos (_∣_⊢li_ S Γ)))
+  → (SF : SubFmas Φ A)
+  → (eq : Φ ≡ (mapList (λ x → proj₁ (proj₁ x)) fs))
+  → f2fs (∧r* fs SF eq) ≡ (fs , Φ , eq , SF , refl)
+f2fs-refl {S} {Γ} fs (conj {Φ} {Ψ} SF1 SF2) eq with fsDist-white Φ Ψ fs eq
+f2fs-refl {S} {Γ} .(((C , f) ∷ fs') ++ (C' , f') ∷ fs'') (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs')} {.(mapList (λ x → proj₁ (proj₁ x)) fs'')} SF1 SF2) refl | (C , f) ∷ fs' , (C' , f') ∷ fs'' , refl , refl , refl 
+  rewrite f2fs-refl ((C , f) ∷ fs') SF1 refl | f2fs-refl ((C' , f') ∷ fs'') SF2 refl = refl
+f2fs-refl (x ∷ []) stop refl = refl
 
--- ∨r₂-ri : {S : Stp} {Γ : Cxt} {A B : Fma}
---   → (f : S ∣ Γ ⊢ri B)
---   → S ∣ Γ ⊢ri A ∨ B
--- ∨r₂-ri f with f2fs f
--- ... | (C , f₁) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ x₁)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen∨r₂-li f₁ fs SF)
+⊗r-ri : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
+  → (f : S ∣ Γ ⊢ri A)
+  → (g : - ∣ Δ ⊢ri B)
+  → S ∣ Γ ++ Δ ⊢ri A ⊗ B
+⊗r-ri {A = A} f g with f2fs f
+... | (C , f₁) ∷ fs , .(mapList (λ x → proj₁ (proj₁ x)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen⊗r-li f₁ fs SF g)
 
--- -- -- admissible rules, except ⊗r-ri, ∨r₁-ri, and ∨r₂-ri
--- Il-ri : {Γ : Cxt} {C : Fma}
---         (f : - ∣ Γ ⊢ri C) →
---     ------------------------
---         just I ∣ Γ ⊢ri C 
--- Il-ri (∧r f f₁) = ∧r (Il-ri f) (Il-ri f₁)
--- Il-ri (li2ri f) = li2ri (Il f)
+∨r₁-ri : {S : Stp} {Γ : Cxt} {A B : Fma}
+  → (f : S ∣ Γ ⊢ri A)
+  → S ∣ Γ ⊢ri A ∨ B
+∨r₁-ri f with f2fs f
+... | (C , f₁) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ x₁)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen∨r₁-li f₁ fs SF)
 
--- ⊗l-ri : {Γ : Cxt} {A B C : Fma}
---         (f : just A ∣ B ∷ Γ ⊢ri C) →
---       --------------------------------
---            just (A ⊗ B) ∣ Γ ⊢ri C 
--- ⊗l-ri (∧r f f₁) = ∧r (⊗l-ri f) (⊗l-ri f₁)
--- ⊗l-ri (li2ri f) = li2ri (⊗l f)
+∨r₂-ri : {S : Stp} {Γ : Cxt} {A B : Fma}
+  → (f : S ∣ Γ ⊢ri B)
+  → S ∣ Γ ⊢ri A ∨ B
+∨r₂-ri f with f2fs f
+... | (C , f₁) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ x₁)) ((C , f₁) ∷ fs)) , refl , SF , refl = li2ri (gen∨r₂-li f₁ fs SF)
 
--- ∨l-ri : {Γ : Cxt} {A B C : Fma}
---         (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C) → 
---         --------------------------------------------
---                 just (A ∨ B) ∣ Γ ⊢ri C
--- ∨l-ri (∧r f f₁) (∧r g g₁) = ∧r (∨l-ri f g) (∨l-ri f₁ g₁)
--- ∨l-ri (li2ri {C = .(pos (` x , snd₁)) , snd} f) (li2ri {C = ` x , snd₁} g) = li2ri (∨l f g)
--- ∨l-ri (li2ri {C = .(pos (I , snd₁)) , snd} f) (li2ri {C = I , snd₁} g) = li2ri (∨l f g)
--- ∨l-ri (li2ri {C = .(pos (A ⊗ B , snd₁)) , snd} f) (li2ri {C = A ⊗ B , snd₁} g) = li2ri (∨l f g)
--- ∨l-ri (li2ri {C = .(pos (A ∨ B , snd₁)) , snd} f) (li2ri {C = A ∨ B , snd₁} g) = li2ri (∨l f g)
+-- -- admissible rules, except ⊗r-ri, ∨r₁-ri, and ∨r₂-ri
+Il-ri : {Γ : Cxt} {C : Fma}
+        (f : - ∣ Γ ⊢ri C) →
+    ------------------------
+        just I ∣ Γ ⊢ri C 
+Il-ri (∧r f f₁) = ∧r (Il-ri f) (Il-ri f₁)
+Il-ri (li2ri f) = li2ri (Il f)
 
--- pass-ri : {Γ : Cxt} {A C : Fma}
---           (f : just A ∣ Γ ⊢ri C) →
---      --------------------------------
---               - ∣ A ∷ Γ ⊢ri C 
--- pass-ri (∧r f f₁) = ∧r (pass-ri f) (pass-ri f₁)
--- pass-ri (li2ri f) = li2ri (p2li (pass f))
+⊗l-ri : {Γ : Cxt} {A B C : Fma}
+        (f : just A ∣ B ∷ Γ ⊢ri C) →
+      --------------------------------
+           just (A ⊗ B) ∣ Γ ⊢ri C 
+⊗l-ri (∧r f f₁) = ∧r (⊗l-ri f) (⊗l-ri f₁)
+⊗l-ri (li2ri f) = li2ri (⊗l f)
 
--- ∧l₁-ri : {Γ : Cxt} {A B C : Fma}
---          (f : just A ∣ Γ ⊢ri C) → 
---               just (A ∧ B) ∣ Γ ⊢ri C
--- ∧l₁-ri (∧r f f₁) = ∧r (∧l₁-ri f) (∧l₁-ri f₁)
--- ∧l₁-ri (li2ri f) = li2ri (p2li (f2p (∧l₁ f)))
+∨l-ri : {Γ : Cxt} {A B C : Fma}
+        (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C) → 
+        --------------------------------------------
+                just (A ∨ B) ∣ Γ ⊢ri C
+∨l-ri (∧r f f₁) (∧r g g₁) = ∧r (∨l-ri f g) (∨l-ri f₁ g₁)
+∨l-ri (li2ri {C = .(pos (` x , snd₁)) , snd} f) (li2ri {C = ` x , snd₁} g) = li2ri (∨l f g)
+∨l-ri (li2ri {C = .(pos (I , snd₁)) , snd} f) (li2ri {C = I , snd₁} g) = li2ri (∨l f g)
+∨l-ri (li2ri {C = .(pos (A ⊗ B , snd₁)) , snd} f) (li2ri {C = A ⊗ B , snd₁} g) = li2ri (∨l f g)
+∨l-ri (li2ri {C = .(pos (A ∨ B , snd₁)) , snd} f) (li2ri {C = A ∨ B , snd₁} g) = li2ri (∨l f g)
 
--- ∧l₂-ri : {Γ : Cxt} {A B C : Fma}
---          (f : just B ∣ Γ ⊢ri C) → 
---               just (A ∧ B) ∣ Γ ⊢ri C
--- ∧l₂-ri (∧r f f₁) = ∧r (∧l₂-ri f) (∧l₂-ri f₁)
--- ∧l₂-ri (li2ri f) = li2ri (p2li (f2p (∧l₂ f)))
+pass-ri : {Γ : Cxt} {A C : Fma}
+          (f : just A ∣ Γ ⊢ri C) →
+     --------------------------------
+              - ∣ A ∷ Γ ⊢ri C 
+pass-ri (∧r f f₁) = ∧r (pass-ri f) (pass-ri f₁)
+pass-ri (li2ri f) = li2ri (f2li (pass f))
 
--- Ir-ri : - ∣ [] ⊢ri I
--- Ir-ri = li2ri (p2li (f2p Ir))
+∧l₁-ri : {Γ : Cxt} {A B C : Fma}
+         (f : just A ∣ Γ ⊢ri C) → 
+              just (A ∧ B) ∣ Γ ⊢ri C
+∧l₁-ri (∧r f f₁) = ∧r (∧l₁-ri f) (∧l₁-ri f₁)
+∧l₁-ri (li2ri f) = li2ri (f2li (∧l₁ f))
 
--- ax-ri : {C : Fma} → just C ∣ [] ⊢ri C
--- ax-ri {C = ` x} = li2ri (p2li (f2p ax))
--- ax-ri {C = I} = li2ri (Il (p2li (f2p Ir)))
--- ax-ri {C = C ⊗ C₁} = ⊗l-ri (⊗r-ri ax-ri (pass-ri ax-ri))
--- ax-ri {C = C ∧ C₁} = ∧r (∧l₁-ri ax-ri) (∧l₂-ri ax-ri)
--- ax-ri {C ∨ C₁} = ∨l-ri (∨r₁-ri ax-ri) (∨r₂-ri ax-ri)
+∧l₂-ri : {Γ : Cxt} {A B C : Fma}
+         (f : just B ∣ Γ ⊢ri C) → 
+              just (A ∧ B) ∣ Γ ⊢ri C
+∧l₂-ri (∧r f f₁) = ∧r (∧l₂-ri f) (∧l₂-ri f₁)
+∧l₂-ri (li2ri f) = li2ri (f2li (∧l₂ f))
 
--- -- focus function maps each derivation in SeqCalc to a focused derivation.
--- focus : {S : Stp} {Γ : Cxt} {C : Fma}
---   → (f : S ∣ Γ ⊢ C)
---   → S ∣ Γ ⊢ri C
--- focus ax = ax-ri
--- focus (pass f) = pass-ri (focus f)
--- focus Ir = Ir-ri
--- focus (Il f) = Il-ri (focus f)
--- focus (⊗r f f₁) = ⊗r-ri (focus f) (focus f₁)
--- focus (⊗l f) = ⊗l-ri (focus f)
--- focus (∧r f f₁) = ∧r (focus f) (focus f₁)
--- focus (∧l₁ f) = ∧l₁-ri (focus f)
--- focus (∧l₂ f) = ∧l₂-ri (focus f)
--- focus (∨r₁ f) = ∨r₁-ri (focus f)
--- focus (∨r₂ f) = ∨r₂-ri (focus f)
--- focus (∨l f g) = ∨l-ri (focus f) (focus g)
+Ir-ri : - ∣ [] ⊢ri I
+Ir-ri = li2ri (f2li Ir)
 
--- -- each emb function maps derivations in a certain phase to a non-focused derivation
--- mutual
---   emb-ri : {S : Stp} {Γ : Cxt} {C : Fma}
---     → (f : S ∣ Γ ⊢ri C)
---     → S ∣ Γ ⊢ C
---   emb-ri (∧r f f₁) = ∧r (emb-ri f) (emb-ri f₁)
---   emb-ri (li2ri f) = emb-li f
+ax-ri : {C : Fma} → just C ∣ [] ⊢ri C
+ax-ri {C = ` x} = li2ri (f2li ax)
+ax-ri {C = I} = li2ri (Il (f2li Ir))
+ax-ri {C = C ⊗ C'} = ⊗l-ri (⊗r-ri ax-ri (pass-ri ax-ri))
+ax-ri {C = C ∧ C'} = ∧r (∧l₁-ri ax-ri) (∧l₂-ri ax-ri)
+ax-ri {C ∨ C'} = ∨l-ri (∨r₁-ri ax-ri) (∨r₂-ri ax-ri)
 
---   emb-riT : {l : List Tag} {S : Irr} {Γ : Cxt} {C : Fma}
---     → (f : l ∣ S ∣ Γ ⊢riT C)
---     → irr S ∣ Γ ⊢ C
---   emb-riT (∧rT f f₁) = ∧r (emb-riT f) (emb-riT f₁)
---   emb-riT (p2riT f) = emb-pT f
+-- focus function maps each derivation in SeqCalc to a focused derivation.
+focus : {S : Stp} {Γ : Cxt} {C : Fma}
+  → (f : S ∣ Γ ⊢ C)
+  → S ∣ Γ ⊢ri C
+focus ax = ax-ri
+focus (pass f) = pass-ri (focus f)
+focus Ir = Ir-ri
+focus (Il f) = Il-ri (focus f)
+focus (⊗r f f₁) = ⊗r-ri (focus f) (focus f₁)
+focus (⊗l f) = ⊗l-ri (focus f)
+focus (∧r f f₁) = ∧r (focus f) (focus f₁)
+focus (∧l₁ f) = ∧l₁-ri (focus f)
+focus (∧l₂ f) = ∧l₂-ri (focus f)
+focus (∨r₁ f) = ∨r₁-ri (focus f)
+focus (∨r₂ f) = ∨r₂-ri (focus f)
+focus (∨l f g) = ∨l-ri (focus f) (focus g)
 
---   emb-li : {S : Stp} {Γ : Cxt} {C : Pos}
---     → (f : S ∣ Γ ⊢li C)
---     → S ∣ Γ ⊢ pos C
---   emb-li (⊗l f) = ⊗l (emb-li f)
---   emb-li (Il f) = Il (emb-li f)
---   emb-li (∨l f g) = ∨l (emb-li f) (emb-li g)
---   emb-li (p2li f) = emb-p f
+-- each emb function maps derivations in a certain phase to a non-focused derivation
+mutual
+  emb-ri : {S : Stp} {Γ : Cxt} {C : Fma}
+    → (f : S ∣ Γ ⊢ri C)
+    → S ∣ Γ ⊢ C
+  emb-ri (∧r f f₁) = ∧r (emb-ri f) (emb-ri f₁)
+  emb-ri (li2ri f) = emb-li f
 
---   emb-p : {S : Irr} {Γ : Cxt} {C : Pos}
---     → (f : S ∣ Γ ⊢p C)
---     → irr S ∣ Γ ⊢ pos C
---   emb-p (pass f) = pass (emb-li f)
---   emb-p (f2p f) = emb-f f
+  emb-riT : {l : List Tag} {S : Irr} {Γ : Cxt} {C : Fma}
+    → (f : l ∣ S ∣ Γ ⊢riT C)
+    → irr S ∣ Γ ⊢ C
+  emb-riT (∧rT f f₁) = ∧r (emb-riT f) (emb-riT f₁)
+  emb-riT (f2riT f) = emb-fT f
 
---   emb-pT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
---     → (f : t ∣ S ∣ Γ ⊢pT C)
---     → irr S ∣ Γ ⊢ pos C
---   emb-pT (passT f) = pass (emb-li f)
---   emb-pT (f2pT f) = emb-fT f
+  emb-li : {S : Stp} {Γ : Cxt} {C : Pos}
+    → (f : S ∣ Γ ⊢li C)
+    → S ∣ Γ ⊢ pos C
+  emb-li (⊗l f) = ⊗l (emb-li f)
+  emb-li (Il f) = Il (emb-li f)
+  emb-li (∨l f g) = ∨l (emb-li f) (emb-li g)
+  emb-li (f2li f) = emb-f f
 
---   emb-f : {S : Irr} {Γ : Cxt} {C : Pos}
---     → (f : S ∣ Γ ⊢f C)
---     → irr S ∣ Γ ⊢ pos C
---   emb-f ax = ax
---   emb-f Ir = Ir
---   emb-f (⊗r l ok refl f g) = ⊗r (emb-riT f) (emb-ri g)
---   emb-f (∧l₁ f) = ∧l₁ (emb-li f)
---   emb-f (∧l₂ f) = ∧l₂ (emb-li f)
---   emb-f (∨r₁ l ok f) = ∨r₁ (emb-riT f)
---   emb-f (∨r₂ l ok f) = ∨r₂ (emb-riT f)
+  emb-f : {S : Irr} {Γ : Cxt} {C : Pos}
+    → (f : S ∣ Γ ⊢f C)
+    → irr S ∣ Γ ⊢ pos C
+  emb-f ax = ax
+  emb-f Ir = Ir
+  emb-f (pass f) = pass (emb-li f)
+  emb-f (⊗r l ok refl f g) = ⊗r (emb-riT f) (emb-ri g)
+  emb-f (∧l₁ f) = ∧l₁ (emb-li f)
+  emb-f (∧l₂ f) = ∧l₂ (emb-li f)
+  emb-f (∨r₁ l ok f) = ∨r₁ (emb-riT f)
+  emb-f (∨r₂ l ok f) = ∨r₂ (emb-riT f)
 
---   emb-fT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
---     → (f : t ∣ S ∣ Γ ⊢fT C)
---     → irr S ∣ Γ ⊢ pos C
---   emb-fT ax = ax
---   emb-fT Ir = Ir
---   emb-fT (⊗rT l ok refl f g) = ⊗r (emb-riT f) (emb-ri g)
---   emb-fT (∧l₁T f) = ∧l₁ (emb-li f)
---   emb-fT (∧l₂T f) = ∧l₂ (emb-li f) 
---   emb-fT (∨r₁T l ok f) = ∨r₁ (emb-riT f)
---   emb-fT (∨r₂T l ok f) = ∨r₂ (emb-riT f)
+  emb-fT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
+    → (f : t ∣ S ∣ Γ ⊢fT C)
+    → irr S ∣ Γ ⊢ pos C
+  emb-fT ax = ax
+  emb-fT Ir = Ir
+  emb-fT (passT f) = pass (emb-li f)
+  emb-fT (⊗rT l ok refl f g) = ⊗r (emb-riT f) (emb-ri g)
+  emb-fT (∧l₁T f) = ∧l₁ (emb-li f)
+  emb-fT (∧l₂T f) = ∧l₂ (emb-li f) 
+  emb-fT (∨r₁T l ok f) = ∨r₁ (emb-riT f)
+  emb-fT (∨r₂T l ok f) = ∨r₂ (emb-riT f)
