@@ -279,3 +279,4 @@ agda/SkSymMonClo/Focusing.agda
 agda/SkMonClo/Utilities.agda
 agda/SkMonClo/formulae.agda
 agda/.DS_Store
+*.json
