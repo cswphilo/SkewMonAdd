@@ -293,14 +293,14 @@ Il-inv-fs-eq ((C , Il f) ∷ fs) = cong (pos C ∷_) (Il-inv-fs-eq fs)
   → mapList (λ x → pos (proj₁ x)) (proj₁ (∨l-inv-fs fs)) ≡ mapList (λ x → pos (proj₁ x)) fs
 ∨l-inv-fs-eq₁ [] = refl
 ∨l-inv-fs-eq₁ ((C , ∨l f g) ∷ fs) = cong (pos C ∷_) (∨l-inv-fs-eq₁ fs)
-{-# REWRITE ∨l-inv-fs-eq₁ #-}
+-- {-# REWRITE ∨l-inv-fs-eq₁ #-}
 
 ∨l-inv-fs-eq₂ : {Γ : Cxt} {A B : Fma}
   → (fs : List (Σ Pos (λ P → just (A ∨ B) ∣ Γ ⊢li P)))
   → mapList (λ x → pos (proj₁ x)) (proj₂ (∨l-inv-fs fs)) ≡ mapList (λ x → pos (proj₁ x)) fs
 ∨l-inv-fs-eq₂ [] = refl
 ∨l-inv-fs-eq₂ ((C , ∨l f g) ∷ fs) = cong (pos C ∷_) (∨l-inv-fs-eq₂ fs)
-{-# REWRITE ∨l-inv-fs-eq₂ #-}
+-- {-# REWRITE ∨l-inv-fs-eq₂ #-}
 
 f2li-pass-fs-eq : {A : Fma} {Γ : Cxt}
   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A) Γ)))
@@ -463,7 +463,8 @@ gen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
   → S ∣ Γ ++ Δ ⊢li (A ⊗ B , _)
 gen⊗r-li (⊗l f) fs refl SF g = ⊗l (gen⊗r-li f (⊗l-inv-fs fs) refl SF g)
 gen⊗r-li (Il f) fs refl SF g = Il (gen⊗r-li f (Il-inv-fs fs) refl SF g)
-gen⊗r-li (∨l f f') fs refl SF g = ∨l (gen⊗r-li f (proj₁ (∨l-inv-fs fs)) refl SF g) (gen⊗r-li f' (proj₂ (∨l-inv-fs fs)) refl SF g)
+gen⊗r-li {C = C} (∨l f f') fs eq SF g = ∨l (gen⊗r-li f (proj₁ (∨l-inv-fs fs)) (trans eq (cong (pos C ∷_) (sym (∨l-inv-fs-eq₁ fs)))) SF g) (gen⊗r-li f'((proj₂ (∨l-inv-fs fs))) (trans eq (cong (pos C ∷_) (sym (∨l-inv-fs-eq₂ fs)))) SF g) -- ∨l (gen⊗r-li f ((proj₁ (∨l-inv-fs fs))) (cong (pos C ∷_) (sym (∨l-inv-fs-eq₁ fs))) SF g) ((gen⊗r-li f' ((proj₂ (∨l-inv-fs fs))) (cong (pos C ∷_) (sym (∨l-inv-fs-eq₂ fs))) SF g))
+-- ∨l (gen⊗r-li f (proj₁ (∨l-inv-fs fs)) refl SF g) (gen⊗r-li f' (proj₂ (∨l-inv-fs fs)) refl SF g)
 gen⊗r-li {C = C} (f2li {S} f) fs refl SF g with check-focus {S} (C , f2li f) fs
 gen⊗r-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₁ f)) .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs') refl SF g | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = f2li (∧l₁ (gen⊗r-li f fs' refl SF g))
 gen⊗r-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₂ f)) .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs') refl SF g | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = f2li (∧l₂ (gen⊗r-li f fs' refl SF g))
@@ -520,7 +521,8 @@ gen∨r₁-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
   → S ∣ Γ ⊢li (A ∨ B , _)
 gen∨r₁-li (⊗l f) fs refl SF = ⊗l (gen∨r₁-li f (⊗l-inv-fs fs) refl SF)
 gen∨r₁-li (Il f) fs refl SF = Il (gen∨r₁-li f (Il-inv-fs fs) refl SF)
-gen∨r₁-li (∨l f f') fs refl SF = ∨l (gen∨r₁-li f (proj₁ (∨l-inv-fs fs)) refl SF) (gen∨r₁-li f' (proj₂ (∨l-inv-fs fs)) refl SF)
+gen∨r₁-li {C = C} (∨l f f') fs refl SF = ∨l (gen∨r₁-li f ((proj₁ (∨l-inv-fs fs))) (cong (pos C ∷_) (sym (∨l-inv-fs-eq₁ fs))) SF) ((gen∨r₁-li f' ((proj₂ (∨l-inv-fs fs))) (cong (pos C ∷_) (sym (∨l-inv-fs-eq₂ fs))) SF))
+-- ∨l (gen∨r₁-li f (proj₁ (∨l-inv-fs fs)) refl SF) (gen∨r₁-li f' (proj₂ (∨l-inv-fs fs)) refl SF)
 gen∨r₁-li {C = C} (f2li {S} f) fs refl SF with check-focus {S} (C , f2li f) fs
 gen∨r₁-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₁ f)) .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs') refl SF | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = f2li (∧l₁ (gen∨r₁-li f fs' refl SF))
 gen∨r₁-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₂ f)) .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs') refl SF | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = f2li (∧l₂ (gen∨r₁-li f fs' refl SF))
@@ -577,7 +579,7 @@ gen∨r₂-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
   → S ∣ Γ ⊢li (A ∨ B , _)
 gen∨r₂-li (⊗l f) fs refl SF = ⊗l (gen∨r₂-li f (⊗l-inv-fs fs) refl SF)
 gen∨r₂-li (Il f) fs refl SF = Il (gen∨r₂-li f (Il-inv-fs fs) refl SF)
-gen∨r₂-li (∨l f f') fs refl SF = ∨l (gen∨r₂-li f (proj₁ (∨l-inv-fs fs)) refl SF) (gen∨r₂-li f' (proj₂ (∨l-inv-fs fs)) refl SF)
+gen∨r₂-li {C = C} (∨l f f') fs refl SF = ∨l (gen∨r₂-li f ((proj₁ (∨l-inv-fs fs))) (cong (pos C ∷_) (sym (∨l-inv-fs-eq₁ fs))) SF) ((gen∨r₂-li f' ((proj₂ (∨l-inv-fs fs))) (cong (pos C ∷_) (sym (∨l-inv-fs-eq₂ fs))) SF))
 gen∨r₂-li {C = C} (f2li {S} f) fs refl SF with check-focus {S} (C , f2li f) fs
 gen∨r₂-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₁ f)) .(mapList (λ x → proj₁ x , f2li (∧l₁ (proj₂ x))) fs') refl SF | inj₁ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl)) = f2li (∧l₁ (gen∨r₂-li f fs' refl SF))
 gen∨r₂-li {C = .C'} (f2li {.(just (A ∧ B)) , .tt} (∧l₂ f)) .(mapList (λ x → proj₁ x , f2li (∧l₂ (proj₂ x))) fs') refl SF | inj₁ (inj₂ (inj₁ (A , B , (C' , .f) ∷ fs' , refl , refl))) = f2li (∧l₂ (gen∨r₂-li f fs' refl SF))

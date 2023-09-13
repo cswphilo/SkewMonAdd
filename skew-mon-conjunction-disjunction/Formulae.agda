@@ -9,6 +9,8 @@ open import Data.Empty
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
 open import Data.Bool hiding (_∧_; _∨_)
+open import Relation.Nullary
+open import Relation.Nullary.Decidable.Core
 
 open import Utilities
 
@@ -92,9 +94,13 @@ isNeg (x ∨ x₁) = ⊥
 -- isNeg top = ⊤
 -- isNeg bot = ⊥
 
--- is⊸ : Fma → Set
--- is⊸ (A ⊸ B) = ⊤
--- is⊸ _ = ⊥
+isNegBool : Fma → Bool
+isNegBool (` x) = true
+isNegBool I = false
+isNegBool (x ⊗ x₁) = false
+-- isNegBool (x ⊸ x₁) = true
+isNegBool (x ∧ x₁) = true
+isNegBool (x ∨ x₁) = false
 
 isAt : Fma → Set
 isAt (` x) = ⊤
@@ -110,6 +116,14 @@ isPos (x ∧ x₁) = ⊥
 isPos (x ∨ x₁) = ⊤
 -- isPos top = ⊥
 -- isPos bot = ⊤
+
+isPosBool : Fma → Bool
+isPosBool (` x) = true
+isPosBool I = true
+isPosBool (A ⊗ A₁) = true
+isPosBool (A ∧ A₁) = false
+isPosBool (A ∨ A₁) = true
+
 isPPos : Fma → Set
 -- isPPos (A ⊸ B) = ⊥
 isPPos (A ∧ B) = ⊥
@@ -122,6 +136,14 @@ isPPos _ = ⊤
 isIrr : Stp → Set
 isIrr - = ⊤
 isIrr (just A) = isNeg (A)
+
+-- isIrrDec : (S : Stp) → Dec (isIrr S)
+-- isIrrDec (just (` x)) = yes tt
+-- isIrrDec (just I) = no (λ z → z)
+-- isIrrDec (just (x ⊗ x₁)) = no (λ z → z)
+-- isIrrDec (just (x ∧ x₁)) = yes tt
+-- isIrrDec (just (x ∨ x₁)) = no (λ z → z)
+-- isIrrDec - = yes tt
 
 isPosS : Stp → Set
 isPosS (just x) = isPos x
@@ -202,6 +224,18 @@ neg (A , a) = A
 neg2irr : Neg → Irr
 neg2irr (A , a) = just A , a 
 
+isPosPos : Pos → Set
+isPosPos (` x , snd) = ⊤
+isPosPos (I , snd) = ⊤
+isPosPos (A ⊗ A₁ , snd) = ⊤
+isPosPos (A ∨ A₁ , snd) = ⊤
+
+isPosDec : (A : Pos) → Dec (isPosPos A) 
+isPosDec (` x , snd) = yes tt
+isPosDec (I , snd) = yes tt
+isPosDec (A ⊗ A₁ , snd) = yes tt
+isPosDec (A ∨ A₁ , snd) = yes tt
+
 --
 -- fmaEQ : Fma → Fma → Bool
 -- fmaEQ (` x) (` x₁) with x ≡ x₁
@@ -217,3 +251,4 @@ neg2irr (A , a) = just A , a
 -- ... | true = fmaEQ A₁ B₁
 -- ... | false = false
 -- fmaEQ (A ⊸ A₁) _ = false
+ 

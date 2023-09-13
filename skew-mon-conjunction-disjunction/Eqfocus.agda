@@ -213,17 +213,33 @@ open import Focusing
 --   → Σ Pos (_∣_⊢li_ (just (A ∨ B)) Γ)
 -- ∨l' (C , f) (.C , g) refl = C , ∨l f g
 
+isPosProp : (A : Fma)
+  → (p q : isPos A)
+  → p ≡ q
+isPosProp A p q = {!   !}
+lem2 : {A B : Fma}
+  → (p : isPos A) (q : isPos B)
+  → A ≡ B
+  → (A , p) ≡ (B , q)
+lem2 p q refl = {!   !}
+
 ∨l-fs : {Γ : Cxt} {A B : Fma}
   → (fs : List (Σ Pos (_∣_⊢li_ (just A) Γ)))
   → (gs : List (Σ Pos (_∣_⊢li_ (just B) Γ)))
   → (eq : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) gs)
   → List (Σ Pos (_∣_⊢li_ (just (A ∨ B)) Γ))
 ∨l-fs [] [] refl = []
-∨l-fs (((C , snd) , f) ∷ fs) (((C' , snd₁) , g) ∷ gs) eq with inj∷ eq
-∨l-fs (((` x , snd) , f) ∷ fs) (((.(` x) , snd₁) , g) ∷ gs) eq | refl , eq1 = ((` x , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
-∨l-fs (((I , snd) , f) ∷ fs) (((.I , snd₁) , g) ∷ gs) eq | refl , eq1 = ((I , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
-∨l-fs (((C ⊗ C' , snd) , f) ∷ fs) (((.(C ⊗ C') , snd₁) , g) ∷ gs) eq | refl , eq1 = ((C ⊗ C' , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
-∨l-fs (((C ∨ C' , snd) , f) ∷ fs) (((.(C ∨ C') , snd₁) , g) ∷ gs) eq | refl , eq1 = ((C ∨ C' , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
+∨l-fs (((C , snd) , f) ∷ fs) (((C' , snd₁) , g) ∷ gs) eq = 
+  ((C , snd) , (∨l f (subst (λ y → just _ ∣ _ ⊢li y) (lem2 _ _ (sym (proj₁ (inj∷ eq)))) g))) ∷ ∨l-fs fs gs (proj₂ (inj∷ eq))
+-- ∨l-fs (((` x , snd) , f) ∷ fs) (((C' , snd₁) , g) ∷ gs) eq = ((` x , _) , (∨l f (subst (λ y → just _ ∣ _ ⊢li (y , _)) (sym (proj₁ (inj∷ eq))) g))) ∷ ∨l-fs fs gs (proj₂ (inj∷ eq))
+-- ∨l-fs (((I , snd) , f) ∷ fs) (((C' , snd₁) , g) ∷ gs) eq = ((I , _) , (∨l f (subst (λ y → just _ ∣ _ ⊢li (y , _)) (sym (proj₁ (inj∷ eq))) g))) ∷ ∨l-fs fs gs (proj₂ (inj∷ eq))
+-- ∨l-fs (((C ⊗ C₃ , snd) , f) ∷ fs) (((C' , snd₁) , g) ∷ gs) eq = ((C ⊗ C₃ , _) , (∨l f (subst (λ y → just _ ∣ _ ⊢li (y , _)) (sym (proj₁ (inj∷ eq))) g))) ∷ ∨l-fs fs gs (proj₂ (inj∷ eq))
+-- ∨l-fs (((C ∨ C₃ , snd) , f) ∷ fs) (((C' , snd₁) , g) ∷ gs) eq = ((C ∨ C₃ , _) , (∨l f (subst (λ y → just _ ∣ _ ⊢li (y , _)) (sym (proj₁ (inj∷ eq))) g))) ∷ ∨l-fs fs gs (proj₂ (inj∷ eq))
+-- with inj∷ eq
+-- ∨l-fs (((` x , snd) , f) ∷ fs) (((.(` x) , snd₁) , g) ∷ gs) eq | refl , eq1 = ((` x , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
+-- ∨l-fs (((I , snd) , f) ∷ fs) (((.I , snd₁) , g) ∷ gs) eq | refl , eq1 = ((I , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
+-- ∨l-fs (((C ⊗ C' , snd) , f) ∷ fs) (((.(C ⊗ C') , snd₁) , g) ∷ gs) eq | refl , eq1 = ((C ⊗ C' , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
+-- ∨l-fs (((C ∨ C' , snd) , f) ∷ fs) (((.(C ∨ C') , snd₁) , g) ∷ gs) eq | refl , eq1 = ((C ∨ C' , _) , (∨l f g)) ∷ ∨l-fs fs gs eq1
 
 fs-succ-eq : {S S' : Stp} {Γ : Cxt} {A : Fma}
   → {Φ Ψ : List Fma}
@@ -235,12 +251,12 @@ fs-succ-eq : {S S' : Stp} {Γ : Cxt} {A : Fma}
   → (SF2 : SubFmas Ψ A)
   → (eq3 : f ≡ ∧r* fs SF1 eq1) (eq4 : f' ≡ ∧r* fs' SF2 eq2)
   → Φ ≡ Ψ
-fs-succ-eq fs fs' eq1 eq2 (conj {Φ} {Ψ} SF1 SF2) (conj {Φ'} {Ψ'} SF3 SF4) eq3 eq4 with fsDist-white Φ Ψ fs eq1 | fsDist-white Φ' Ψ' fs' eq2
-fs-succ-eq .((((A , snd) , snd₁) ∷ fs₁) ++ f₁ ∷ fs₂) .((((A' , snd₂) , snd₃) ∷ fs'₁) ++ f'₁ ∷ fs'₂) refl refl (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs₁)} {.(mapList (λ x → proj₁ (proj₁ x)) fs₂)} SF1 SF2) (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs'₁)} {.(mapList (λ x → proj₁ (proj₁ x)) fs'₂)} SF3 SF4) eq3 eq4 | ((A , snd) , snd₁) ∷ fs₁ , f₁ ∷ fs₂ , refl , refl , refl | ((A' , snd₂) , snd₃) ∷ fs'₁ , f'₁ ∷ fs'₂ , refl , refl , refl = 
-  cong₂ _++_ (fs-succ-eq (((A , snd) , snd₁) ∷ fs₁) (((A' , snd₂) , snd₃) ∷ fs'₁) refl refl SF1 SF3 refl refl) (fs-succ-eq (f₁ ∷ fs₂) (f'₁ ∷ fs'₂) refl refl SF2 SF4 refl refl) 
-fs-succ-eq fs (((.(_ ∧ _) , snd) , snd₁) ∷ []) eq1 refl (conj SF1 SF2) stop eq3 eq4 = ⊥-elim snd
-fs-succ-eq (((.(_ ∧ _) , snd) , snd₁) ∷ []) fs' refl eq2 stop (conj SF2 SF3) eq3 eq4 = ⊥-elim snd
-fs-succ-eq (f ∷ []) (f' ∷ []) refl refl stop stop eq3 eq4 = refl
+-- fs-succ-eq fs fs' eq1 eq2 (conj {Φ} {Ψ} SF1 SF2) (conj {Φ'} {Ψ'} SF3 SF4) eq3 eq4 with fsDist-white Φ Ψ fs eq1 | fsDist-white Φ' Ψ' fs' eq2
+-- fs-succ-eq .((((A , snd) , snd₁) ∷ fs₁) ++ f₁ ∷ fs₂)` .((((A' , snd₂) , snd₃) ∷ fs'₁) ++ f'₁ ∷ fs'₂) refl refl (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs₁)} {.(mapList (λ x → proj₁ (proj₁ x)) fs₂)} SF1 SF2) (conj {.(mapList (λ x → proj₁ (proj₁ x)) fs'₁)} {.(mapList (λ x → proj₁ (proj₁ x)) fs'₂)} SF3 SF4) eq3 eq4 | ((A , snd) , snd₁) ∷ fs₁ , f₁ ∷ fs₂ , refl , refl , refl | ((A' , snd₂) , snd₃) ∷ fs'₁ , f'₁ ∷ fs'₂ , refl , refl , refl = 
+--   cong₂ _++_ (fs-succ-eq (((A , snd) , snd₁) ∷ fs₁) (((A' , snd₂) , snd₃) ∷ fs'₁) refl refl SF1 SF3 refl refl) (fs-succ-eq (f₁ ∷ fs₂) (f'₁ ∷ fs'₂) refl refl SF2 SF4 refl refl) 
+-- fs-succ-eq fs (((.(_ ∧ _) , snd) , snd₁) ∷ []) eq1 refl (conj SF1 SF2) stop eq3 eq4 = ⊥-elim snd
+-- fs-succ-eq (((.(_ ∧ _) , snd) , snd₁) ∷ []) fs' refl eq2 stop (conj SF2 SF3) eq3 eq4 = ⊥-elim snd
+-- fs-succ-eq (f ∷ []) (f' ∷ []) refl refl stop stop eq3 eq4 = refl
 
 
 ∨l-fs-eq : {Γ : Cxt} {A' B' : Fma}
@@ -256,16 +272,33 @@ fs-succ-eq (f ∷ []) (f' ∷ []) refl refl stop stop eq3 eq4 = refl
 ∨l-fs-eq (((C ⊗ C' , snd) , f) ∷ fs) (((.(C ⊗ C') , snd₁) , g) ∷ fs') eq | refl , eq1 = cong ((C ⊗ C') ∷_) (∨l-fs-eq fs fs' eq1)
 ∨l-fs-eq (((C ∨ C' , snd) , f) ∷ fs) (((.(C ∨ C') , snd₁) , g) ∷ fs') eq | refl , eq1 = cong ((C ∨ C') ∷_) (∨l-fs-eq fs fs' eq1)
 
-fs-fs'-rewrite : {Γ : Cxt} {A' B' : Fma}
+∨l-fs-eq₂ : {Γ : Cxt} {A' B' : Fma}
   -- → {Φ Ψ : List Fma}
   → (fs : List (Σ Pos (_∣_⊢li_ (just A') Γ)))
   → (fs' : List (Σ Pos (_∣_⊢li_ (just B') Γ)))
   → (eq : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
-  → Σ (List Fma) λ Φ → mapList (λ x → proj₁ (proj₁ x)) fs ≡ Φ
-fs-fs'-rewrite [] [] refl = [] , refl
-fs-fs'-rewrite (x ∷ fs) (x₁ ∷ fs') eq with inj∷ eq
-... | refl , eq1 with fs-fs'-rewrite fs fs' eq1
-... | Φ , eq2 = proj₁ (proj₁ x₁) ∷ Φ , cong (proj₁ (proj₁ x₁) ∷_) eq2
+  → mapList (λ x → proj₁ (proj₁ x)) fs' ≡ mapList (λ x → pos (proj₁ x)) (∨l-fs fs fs' eq)
+
+-- fs-fs'-rewrite : {Γ : Cxt} {A' B' : Fma}
+--   -- → {Φ Ψ : List Fma}
+--   → (fs : List (Σ Pos (_∣_⊢li_ (just A') Γ)))
+--   → (fs' : List (Σ Pos (_∣_⊢li_ (just B') Γ)))
+--   → (eq : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
+--   → Σ (List Fma) λ Φ → mapList (λ x → proj₁ (proj₁ x)) fs ≡ Φ
+-- fs-fs'-rewrite [] [] refl = [] , refl
+-- fs-fs'-rewrite (x ∷ fs) (x₁ ∷ fs') eq with inj∷ eq
+-- ... | refl , eq1 with fs-fs'-rewrite fs fs' eq1
+-- ... | Φ , eq2 = proj₁ (proj₁ x₁) ∷ Φ , cong (proj₁ (proj₁ x₁) ∷_) eq2
+
+∨l++ : {Γ : Cxt} {A B : Fma}
+  → (fs1 fs2 : List (Σ Pos (_∣_⊢li_ (just A) Γ)))
+  → (gs1 gs2 : List (Σ Pos (_∣_⊢li_ (just B) Γ)))
+  → (eq : mapList (λ x → proj₁ (proj₁ x)) fs1 ≡ mapList (λ x → proj₁ (proj₁ x)) gs1)
+  → (eq2 : mapList (λ x → proj₁ (proj₁ x)) fs2 ≡ mapList (λ x → proj₁ (proj₁ x)) gs2)
+  → (eq3 : mapList (λ x → proj₁ (proj₁ x)) (fs1 ++ fs2) ≡ mapList (λ x → proj₁ (proj₁ x)) (gs1 ++ gs2))
+  → ∨l-fs (fs1 ++ fs2) (gs1 ++ gs2) eq3 ≡ (∨l-fs fs1 gs1 eq) ++ (∨l-fs fs2 gs2 eq2)
+-- {-# REWRITE ∨l++ #-}
+
 
 
 SubFmas-∨l : {Γ : Cxt} {A' B' A : Fma}
@@ -276,8 +309,17 @@ SubFmas-∨l : {Γ : Cxt} {A' B' A : Fma}
   → (eq3 : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
   → (SF1 : SubFmas Φ A) (SF2 : SubFmas Ψ A)
   → SubFmas (mapList (λ x → pos (proj₁ x)) (∨l-fs fs fs' eq3)) A
+-- SubFmas-∨l fs fs' eq1 eq2 eq3 (conj {Φ = Φ} {Ψ} SF1 SF2) (conj {Φ = Φ'} {Ψ'} SF3 SF4) 
 SubFmas-∨l fs fs' eq1 eq2 eq3 (conj {Φ = Φ} {Ψ} SF1 SF2) (conj {Φ = Φ'} {Ψ'} SF3 SF4) with fsDist-white Φ Ψ fs eq1 | fsDist-white Φ' Ψ' fs' eq2 
-SubFmas-∨l .((((A , snd) , f1) ∷ fs1) ++ f2 ∷ fs2) .((((A' , snd₂) , f1') ∷ fs1') ++ f2' ∷ fs2') refl refl eq3 (conj {Φ = .(mapList (λ x → proj₁ (proj₁ x)) fs1)} {.(mapList (λ x → proj₁ (proj₁ x)) fs2)} SF1 SF2) (conj {Φ = .(mapList (λ x → proj₁ (proj₁ x)) fs1')} {.(mapList (λ x → proj₁ (proj₁ x)) fs2')} SF3 SF4) | ((A , snd) , f1) ∷ fs1 , f2 ∷ fs2 , refl , refl , refl | ((A' , snd₂) , f1') ∷ fs1' , f2' ∷ fs2' , refl , refl , refl = {! fs-succ-eq (((A , snd) , f1) ∷ fs1) (((A' , snd₂)) ∷ fs1') refl refl SF1 SF3 refl refl  !}
+SubFmas-∨l .((f1 ∷ fs1) ++ f2 ∷ fs2) .((f1' ∷ fs1') ++ f2' ∷ fs2') refl refl eq3 (conj {Φ = .(mapList (λ x → proj₁ (proj₁ x)) fs1)} {.(mapList (λ x → proj₁ (proj₁ x)) fs2)} SF1 SF2) (conj {Φ = .(mapList (λ x → proj₁ (proj₁ x)) fs1')} {.(mapList (λ x → proj₁ (proj₁ x)) fs2')} SF3 SF4) | f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl | f1' ∷ fs1' , f2' ∷ fs2' , refl , refl , refl = subst (λ y → SubFmas (_ ∷ mapList (λ x → proj₁ (proj₁ x)) y) (_ ∧ _)) (sym
+ (proj₂
+  (inj∷
+   (∨l++ (f1 ∷ fs1) (f2 ∷ fs2) (f1' ∷ fs1') (f2' ∷ fs2')
+    (fs-succ-eq (f1 ∷ fs1) (f1' ∷ fs1') refl refl SF1 SF3 refl refl)
+    (fs-succ-eq (f2 ∷ fs2) (f2' ∷ fs2') refl refl SF2 SF4 refl refl)
+    eq3))))
+  (conj (SubFmas-∨l (f1 ∷ fs1) (f1' ∷ fs1') refl refl (fs-succ-eq (f1 ∷ fs1) (f1' ∷ fs1') refl refl SF1 SF3 refl refl) SF1 SF3) (SubFmas-∨l (f2 ∷ fs2) (f2' ∷ fs2') refl refl (fs-succ-eq _ _ refl refl SF2 SF4 refl refl) SF2 SF4))
+  -- rewrite proj₂ (inj∷ (∨l++ (f1 ∷ fs1) (f2 ∷ fs2) (f1' ∷ fs1') (f2' ∷ fs2') (fs-succ-eq (f1 ∷ fs1) (f1' ∷ fs1') refl refl SF1 SF3 refl refl) (fs-succ-eq (f2 ∷ fs2) (f2' ∷ fs2') refl refl SF2 SF4 refl refl) eq3)) = conj (SubFmas-∨l (f1 ∷ fs1) (f1' ∷ fs1') refl refl (fs-succ-eq (f1 ∷ fs1) (f1' ∷ fs1') refl refl SF1 SF3 refl refl) SF1 SF3) (SubFmas-∨l (f2 ∷ fs2) (f2' ∷ fs2') refl refl (fs-succ-eq _ _ refl refl SF2 SF4 refl refl) SF2 SF4)
 SubFmas-∨l fs fs' eq1 eq2 eq3 (conj SF1 SF2) stop = {!   !}
 SubFmas-∨l fs fs' eq1 eq2 eq3 stop (conj SF2 SF3) = {!   !}
 SubFmas-∨l (((` x , snd) , f) ∷ []) (((.(` x) , snd₂) , f') ∷ []) refl refl refl stop stop = stop
@@ -294,21 +336,117 @@ SubFmas-∨l (((A ∨ A₁ , snd) , f) ∷ []) (((.(A ∨ A₁) , snd₂) , f') 
   → (SF2 : SubFmas (mapList (λ x → proj₁ (proj₁ x)) fs') A)
   → (eq : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
   → ∨l-ri (∧r* fs SF1 refl) (∧r* fs' SF2 refl) ≡ ∧r* (∨l-fs fs fs' eq) (SubFmas-∨l fs fs' refl refl eq SF1 SF2) refl
-  -- (SubFmas-∨l fs fs' refl refl eq SF1 SF2) refl
-  -- ∧r* (∨l-fs fs fs' eq) SF1 (∨l-fs-eq fs fs' eq)
+--   -- (SubFmas-∨l fs fs' refl refl eq SF1 SF2) refl
+--   -- ∧r* (∨l-fs fs fs' eq) SF1 (∨l-fs-eq fs fs' eq)
 
+-- lem : {Γ : Cxt} {A A' B' : Fma}
+--   → (f' : just B' ∣ Γ ⊢ri A)
+--   → (fs : List (Σ (Σ Fma isPos) (_∣_⊢li_ (just A') Γ))) 
+--   -- → (Φ : List Fma)
+--   -- → (eq : Φ ≡ mapList (λ x → proj₁ (proj₁ x)) fs)
+--   → (SF : SubFmas (mapList (λ x → proj₁ (proj₁ x)) fs) A)
+--   → Σ (List (Σ (Σ Fma isPos) (_∣_⊢li_ (just B') Γ))) λ fs' → f2fs f' ≡ (fs' , mapList (λ x → proj₁ (proj₁ x)) fs , {!   !} , SF , {!   !})
+-- lem fs Φ eq SF = ?
+
+
+lem3 : {Γ : Cxt} {A B : Fma}
+  → (fs : List (Σ Pos (_∣_⊢li_ (just A) Γ)))
+  → (gs : List (Σ Pos (_∣_⊢li_ (just B) Γ)))
+  → (eq : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) gs)
+  → proj₁ (∨l-inv-fs (∨l-fs fs gs eq)) ≡ fs
+lem3 [] [] refl = refl
+lem3 (x ∷ fs) (x₁ ∷ gs) eq with inj∷ eq
+... | refl , eq1 = cong (x ∷_) (lem3 fs gs eq1)
+
+lem4 : {Γ : Cxt} {A B : Fma}
+  → (fs : List (Σ Pos (_∣_⊢li_ (just A) Γ)))
+  → (gs : List (Σ Pos (_∣_⊢li_ (just B) Γ)))
+  → (eq : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) gs)
+  → proj₂ (∨l-inv-fs (∨l-fs fs gs eq)) ≡ gs
+lem4 [] [] refl = refl
+lem4 (x ∷ fs) (x₁ ∷ gs) eq with inj∷ eq
+lem4 (((.(proj₁ (proj₁ x₁)) , snd) , snd₁) ∷ fs) (x₁ ∷ gs) eq | refl , eq1 
+  rewrite isPosProp (proj₁ (proj₁ x₁)) snd (proj₂ (proj₁ x₁)) = cong (x₁ ∷_) (lem4 fs gs eq1) -- cong₂ _∷_ {! cong (λ y → y , (proj₂ x₁))  !} {!   !} -- cong₂ _∷_ {! lem2 _ _ refl!} (lem4 fs gs eq1) -- cong (x₁ ∷_) (lem4 fs gs eq1)
+
+SubFmas-∨l-eq : {Γ : Cxt} {A' B' A : Fma}
+  → {Φ Ψ : List Fma}
+  → (fs : List (Σ Pos (_∣_⊢li_ (just A') Γ)))
+  → (fs' : List (Σ Pos (_∣_⊢li_ (just B') Γ)))
+  → (eq1 : Φ ≡ mapList (λ x → proj₁ (proj₁ x)) fs) (eq2 : Ψ ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
+  → (eq3 : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
+  → (eq4 : mapList (λ x → pos (proj₁ x)) (∨l-fs fs fs' eq3) ≡ Φ)
+  → (SF1 : SubFmas Φ A) (SF2 : SubFmas Ψ A)
+  → subst (λ y → SubFmas y A) eq4 (SubFmas-∨l fs fs' eq1 eq2 eq3 SF1 SF2) ≡ SF1
+SubFmas-∨l-eq fs fs' eq1 eq2 eq3 eq4 (conj {Φ = Φ} {Ψ} SF1 SF2) (conj {Φ = Φ₁} {Ψ₁} SF3 SF4) with fsDist-white Φ Ψ fs eq1 | fsDist-white Φ₁ Ψ₁ fs' eq2 
+SubFmas-∨l-eq .((((fst , snd) , snd₁) ∷ fs1) ++ f2 ∷ fs2) .((((fst₁ , snd₂) , snd₃) ∷ fs1') ++ f2' ∷ fs2') refl refl eq3 eq4 (conj {Φ = .(mapList (λ x → proj₁ (proj₁ x)) fs1)} {.(mapList (λ x → proj₁ (proj₁ x)) fs2)} SF1 SF2) (conj {Φ = .(mapList (λ x → proj₁ (proj₁ x)) fs1')} {.(mapList (λ x → proj₁ (proj₁ x)) fs2')} SF3 SF4) | ((fst , snd) , snd₁) ∷ fs1 , f2 ∷ fs2 , refl , refl , refl | ((fst₁ , snd₂) , snd₃) ∷ fs1' , f2' ∷ fs2' , refl , refl , refl = {!   !}
+  -- rewrite proj₂ (inj∷ (∨l++ (((fst , snd) , snd₁) ∷ fs1) (f2 ∷ fs2) (((fst₁ , snd₂) , snd₃) ∷ fs1') (f2' ∷ fs2') (fs-succ-eq (_ ∷ fs1) (_ ∷ fs1') refl refl SF1 SF3 refl refl) (fs-succ-eq (f2 ∷ fs2) (f2' ∷ fs2') refl refl SF2 SF4 refl refl) eq3)) = ?
+SubFmas-∨l-eq fs fs' eq1 eq2 eq3 eq4 (conj SF1 SF2) stop = {!   !}
+SubFmas-∨l-eq fs fs' eq1 eq2 eq3 eq4 stop (conj SF2 SF3) = {!   !}
+SubFmas-∨l-eq fs fs' eq1 eq2 eq3 eq4 stop stop = {!   !}
+
+SubFmas-∨l-eq₁ : {Γ : Cxt} {A' B' A : Fma}
+  → {Φ Ψ : List Fma}
+  → (fs : List (Σ Pos (_∣_⊢li_ (just A') Γ)))
+  → (fs' : List (Σ Pos (_∣_⊢li_ (just B') Γ)))
+  → (eq1 : Φ ≡ mapList (λ x → proj₁ (proj₁ x)) fs) (eq2 : Ψ ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
+  → (eq3 : mapList (λ x → proj₁ (proj₁ x)) fs ≡ mapList (λ x → proj₁ (proj₁ x)) fs')
+  → (eq4 : mapList (λ x → pos (proj₁ x)) (∨l-fs fs fs' eq3) ≡ Ψ)
+  → (SF1 : SubFmas Φ A) (SF2 : SubFmas Ψ A)
+  → subst (λ y → SubFmas y A) eq4 (SubFmas-∨l fs fs' eq1 eq2 eq3 SF1 SF2) ≡ SF2
+
+gen⊗r-eq : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C C' : Pos}
+  → {Φ Ψ : List Fma}
+  → (f : S ∣ Γ ⊢li C)
+  → (f' : S ∣ Γ ⊢li C')
+  → (fs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → (gs : List (Σ Pos (λ C → S ∣ Γ ⊢li C)))
+  → (SF1 : SubFmas Φ A)
+  → (SF2 : SubFmas Ψ A)
+  → (g : - ∣ Δ ⊢ri B)
+  → (eq : Φ ≡ ((proj₁ C) ∷ mapList (λ x₂ → proj₁ (proj₁ x₂)) fs))
+  → (eq' : Ψ ≡ ((proj₁ C') ∷ mapList (λ x₂ → proj₁ (proj₁ x₂)) gs))
+  → (eq'' : Φ ≡ Ψ) (eq''' : C ≡ C')
+  → (eq0 : subst (λ y → S ∣ Γ ⊢li y) eq''' f ≡ f')
+  → (eq1 : fs ≡ gs)
+  → (eq2 : subst (λ y → SubFmas y A) eq'' SF1 ≡ SF2)
+  → gen⊗r-li f fs eq SF1 g ≡ gen⊗r-li f' gs eq' SF2 g
+gen⊗r-eq f f' fs gs SF1 SF2 g refl refl refl refl refl refl refl = refl 
 
 ⊗r∨l-ri : {Γ Δ : Cxt} {A A' B B' : Fma}
   → (f : just A' ∣ Γ ⊢ri A) (f' : just B' ∣ Γ ⊢ri A)
   → (g : - ∣ Δ ⊢ri B)
   → ⊗r-ri (∨l-ri f f') g ≡ ∨l-ri (⊗r-ri f g) (⊗r-ri f' g)
-⊗r∨l-ri f f' g with f2fs f | f2fs f' 
-... | fs , Φ , eq1 , SF1 , eq2 | fs' , Ψ , eq3 , SF2 , eq4 with fs-succ-eq fs fs' eq1 eq3 SF1 SF2 eq2 eq4
-⊗r∨l-ri .(∧r* (f ∷ fs) SF1 refl) .(∧r* (f' ∷ fs') SF2 refl) g | f ∷ fs , .(mapList (λ x₂ → proj₁ (proj₁ x₂)) (f ∷ fs)) , refl , SF1 , refl | f' ∷ fs' , .(mapList (λ x₂ → proj₁ (proj₁ x₂)) (f' ∷ fs')) , refl , SF2 , refl | eq5 with inj∷ eq5
-⊗r∨l-ri .(∧r* (((` x , snd) , f) ∷ fs) SF1 refl) .(∧r* (((` x , snd₃) , f') ∷ fs') SF2 refl) g | ((` x , snd) , f) ∷ fs , .(mapList _ (((` x , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.(` x) , snd₃) , f') ∷ fs' , .(mapList _ (((` x , snd₃) , f') ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
-⊗r∨l-ri .(∧r* (((I , snd) , f) ∷ fs) SF1 refl) .(∧r* (((I , snd₃) , snd₂) ∷ fs') SF2 refl) g | ((I , snd) , f) ∷ fs , .(mapList _ (((I , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.I , snd₃) , snd₂) ∷ fs' , .(mapList _ (((I , snd₃) , snd₂) ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
-⊗r∨l-ri .(∧r* (((A ⊗ A₁ , snd) , f) ∷ fs) SF1 refl) .(∧r* (((A ⊗ A₁ , snd₃) , snd₂) ∷ fs') SF2 refl) g | ((A ⊗ A₁ , snd) , f) ∷ fs , .(mapList _ (((A ⊗ A₁ , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.(A ⊗ A₁) , snd₃) , snd₂) ∷ fs' , .(mapList _ (((A ⊗ A₁ , snd₃) , snd₂) ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
-⊗r∨l-ri .(∧r* (((A ∨ A₁ , snd) , f) ∷ fs) SF1 refl) .(∧r* (((A ∨ A₁ , snd₃) , snd₂) ∷ fs') SF2 refl) g | ((A ∨ A₁ , snd) , f) ∷ fs , .(mapList _ (((A ∨ A₁ , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.(A ∨ A₁) , snd₃) , snd₂) ∷ fs' , .(mapList _ (((A ∨ A₁ , snd₃) , snd₂) ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
+⊗r∨l-ri f f' g with f2fs f | f2fs f'  
+... | x ∷ fs , .(mapList (λ x₂ → proj₁ (proj₁ x₂)) (x ∷ fs)) , refl , SF1 , refl | x₁ ∷ fs' , .(mapList (λ x₂ → proj₁ (proj₁ x₂)) (x₁ ∷ fs')) , refl , SF2 , refl 
+  rewrite ∨l-ri-∧r* (x ∷ fs) (x₁ ∷ fs') SF1 SF2 (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl) | f2fs-refl (∨l-fs (x ∷ fs) (x₁ ∷ fs') (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl)) (SubFmas-∨l (x ∷ fs) (x₁ ∷ fs') refl refl
+           (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl) SF1
+           SF2) refl  = cong li2ri (cong₂ ∨l {!   !} {!   !})
+--           cong li2ri (cong₂ ∨l (gen⊗r-eq (proj₂ x) _ _ fs _ _ _ _ _ (cong (pos (proj₁ x) ∷_) (sym (∨l-fs-eq fs fs' _))) refl refl ((lem3 fs fs' (proj₂
+--           (inj∷
+--            (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl))))) (SubFmas-∨l-eq (x ∷ fs) (x₁ ∷ fs') refl refl _ _ SF1 SF2)) (gen⊗r-eq
+--  (subst (_∣_⊢li_ (just _) _)
+--   (lem2 (proj₂ (proj₁ x₁)) (proj₂ (proj₁ x))
+--    (sym
+--     (proj₁
+--      (inj∷
+--       (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl)))))
+--   (proj₂ x₁))
+--  (proj₂ x₁) _ fs' _ SF2 g _ _ ((cong₂ (_∷_) ((proj₁
+--      (inj∷
+--       (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl)))) (sym (∨l-fs-eq₂ fs fs' _)))) (sym (lem2 (proj₂ (proj₁ x₁)) (proj₂ (proj₁ x))
+--    (sym
+--     (proj₁
+--      (inj∷
+--       (fs-succ-eq (x ∷ fs) (x₁ ∷ fs') refl refl SF1 SF2 refl refl)))))) {!  !} (lem4 fs fs' _) ((SubFmas-∨l-eq₁ (x ∷ fs) (x₁ ∷ fs') refl refl _ _ SF1 SF2))))
+
+
+-- ⊗r∨l-ri f f' g with f2fs f | f2fs f' 
+-- ... | fs , Φ , eq1 , SF1 , eq2 | fs' , Ψ , eq3 , SF2 , eq4 with fs-succ-eq fs fs' eq1 eq3 SF1 SF2 eq2 eq4
+-- ⊗r∨l-ri .(∧r* (f ∷ fs) SF1 refl) .(∧r* (f' ∷ fs') SF2 refl) g | f ∷ fs , .(mapList (λ x₂ → proj₁ (proj₁ x₂)) (f ∷ fs)) , refl , SF1 , refl | f' ∷ fs' , .(mapList (λ x₂ → proj₁ (proj₁ x₂)) (f' ∷ fs')) , refl , SF2 , refl | eq5 with inj∷ eq5
+-- ⊗r∨l-ri .(∧r* (((` x , snd) , f) ∷ fs) SF1 refl) .(∧r* (((` x , snd₃) , f') ∷ fs') SF2 refl) g | ((` x , snd) , f) ∷ fs , .(mapList _ (((` x , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.(` x) , snd₃) , f') ∷ fs' , .(mapList _ (((` x , snd₃) , f') ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {! z  !}
+-- ⊗r∨l-ri .(∧r* (((I , snd) , f) ∷ fs) SF1 refl) .(∧r* (((I , snd₃) , snd₂) ∷ fs') SF2 refl) g | ((I , snd) , f) ∷ fs , .(mapList _ (((I , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.I , snd₃) , snd₂) ∷ fs' , .(mapList _ (((I , snd₃) , snd₂) ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
+-- ⊗r∨l-ri .(∧r* (((A ⊗ A₁ , snd) , f) ∷ fs) SF1 refl) .(∧r* (((A ⊗ A₁ , snd₃) , snd₂) ∷ fs') SF2 refl) g | ((A ⊗ A₁ , snd) , f) ∷ fs , .(mapList _ (((A ⊗ A₁ , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.(A ⊗ A₁) , snd₃) , snd₂) ∷ fs' , .(mapList _ (((A ⊗ A₁ , snd₃) , snd₂) ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
+-- ⊗r∨l-ri .(∧r* (((A ∨ A₁ , snd) , f) ∷ fs) SF1 refl) .(∧r* (((A ∨ A₁ , snd₃) , snd₂) ∷ fs') SF2 refl) g | ((A ∨ A₁ , snd) , f) ∷ fs , .(mapList _ (((A ∨ A₁ , snd) , f) ∷ fs)) , refl , SF1 , refl | ((.(A ∨ A₁) , snd₃) , snd₂) ∷ fs' , .(mapList _ (((A ∨ A₁ , snd₃) , snd₂) ∷ fs')) , refl , SF2 , refl | eq5 | refl , eq6 = {!   !}
 
 -- equivalent derivations in SeqCalc are identical in Focused
 eqfocus :{S : Stp} {Γ : Cxt} {C : Fma}

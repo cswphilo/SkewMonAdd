@@ -1,6 +1,6 @@
 {-# OPTIONS --rewriting #-}
 
-module FocusingNew where
+module FocusingNewTag where
 
 open import Data.List renaming (map to mapList; zip to zipList)
 open import Data.List.Relation.Unary.All renaming (map to mapAll)
@@ -13,9 +13,6 @@ open import Data.Unit
 open import Data.Empty
 open import Relation.Binary.PropositionalEquality hiding (_≗_; [_])
 open import Data.Bool hiding (_∧_; _∨_)
-open import Relation.Nullary
-open import Relation.Nullary.Decidable.Core
-
 
 open import Utilities
 open import Formulae
@@ -27,67 +24,27 @@ mapList++ [] ys = refl
 mapList++ {f = f} (x ∷ xs) ys = cong (f x ∷_) (mapList++ xs ys)
 {-# REWRITE mapList++ #-}
 
--- data TagListC₁ : Set where
---   cont : TagListC₁ → TagListC₁
---   RafterC₁ : TagListC₁
---   C₂afterC₁ : TagListC₁
+{-
+How do we deal with separation of tags?
+In previous definition, we can split a list of tags easily.
+It is not clear to me how to separate a datatype.
+-}
 
--- data TagListC₂ : Set where
---   cont : TagListC₂ → TagListC₂
---   RafterC₂ : TagListC₂
---   C₁afterC₂ : TagListC₂
+data TagListC₁ : Set where
+  cont : TagListC₁ → TagListC₁
+  RafterC₁ : TagListC₁
+  C₂afterC₁ : TagListC₁
 
--- data TagList : Set where
---   isR : TagList
---   isP : TagList → TagList
---   isC₁ : TagListC₁ → TagList
---   isC₂ : TagListC₂ → TagList
+data TagListC₂ : Set where
+  cont : TagListC₂ → TagListC₂
+  RafterC₂ : TagListC₂
+  C₁afterC₂ : TagListC₂
 
-
-
-data Tag : Set where
-  R : Tag
-  C₁ : Tag
-  C₂ : Tag
-  P : Tag
-
--- {-
--- a type of correctly tagged derivation
--- -}
-data isOKC₁ : List Tag → Set where
-  cont : (l : List Tag) → isOKC₁ (C₁ ∷ l)
-  stopR : (l : List Tag) → isOKC₁ (R ∷ l)
-  stopC₂ : (l : List Tag) → isOKC₁ (C₂ ∷ l)
-
-data isOKC₂ : List Tag → Set where
-  cont : (l : List Tag) → isOKC₂ (C₂ ∷ l)
-  stopR : (l : List Tag) → isOKC₂ (R ∷ l)
-  stopC₁ : (l : List Tag) → isOKC₂ (C₁ ∷ l)
-  
-data isOK : List Tag → Set where
-  isR : (l : List Tag) → isOK (R ∷ l)
-  isP : (l : List Tag) → isOK l → isOK (P ∷ l)
-  isC₁ : (l : List Tag) → isOKC₁ l → isOK (C₁ ∷ l)
-  isC₂ : (l : List Tag) → isOKC₂ l → isOK (C₂ ∷ l)
-
--- isOKC₁ : List Tag → Set
--- isOKC₁ (C₂ ∷ l) = ⊤
--- isOKC₁ (R ∷ l) = ⊤
--- isOKC₁ (C₁ ∷ l) = isOKC₁ l
--- isOKC₁ _ = ⊥
-
--- isOKC₂ : List Tag → Set
--- isOKC₂ (C₁ ∷ l) = ⊤
--- isOKC₂ (R ∷ l) = ⊤
--- isOKC₂ (C₂ ∷ l) = isOKC₂ l
--- isOKC₂ _ = ⊥
-
--- isOK : List Tag → Set
--- isOK [] = ⊥
--- isOK (R ∷ l) = ⊤
--- isOK (C₁ ∷ l) = isOKC₁ l
--- isOK (C₂ ∷ l) = isOKC₂ l
--- isOK (P ∷ l) = isOK l 
+data TagList : Set where
+  isR : TagList
+  isP : TagList → TagList
+  isC₁ : TagListC₁ → TagList
+  isC₂ : TagListC₂ → TagList
 
 -- ri = right invertible
 data _∣_⊢ri_ : Stp → Cxt → Fma → Set
@@ -106,7 +63,7 @@ data _∣_⊢ri_ where
     → (f : S ∣ Γ ⊢ri A) (g : S ∣ Γ ⊢ri B)
     ---------------------------------------
     →          S ∣ Γ ⊢ri A ∧ B
-  li2ri : {S : Stp} {Γ : Cxt} {C : Pos} {p : True (isPosDec C)}
+  li2ri : {S : Stp} {Γ : Cxt} {C : Pos}
     → (f : S ∣ Γ ⊢li C)
     ------------------------
     →      S ∣ Γ ⊢ri pos C
@@ -116,13 +73,13 @@ data _∣_∣_⊢riT_ where
     → (f : l ∣ S ∣ Γ ⊢riT A) (g : l' ∣ S ∣ Γ ⊢riT B)
     ---------------------------------------------------------
     →             (l ++ l') ∣ S ∣ Γ ⊢riT A ∧ B
-  f2riT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos} {p : True (isPosDec C)}
+  f2riT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
     → (f : t ∣ S ∣ Γ ⊢fT C)
     ------------------------
     →    [ t ] ∣ S ∣ Γ ⊢riT pos C
 
 data _∣_⊢li_ where
-  ⊗l : {Γ : Cxt} {A B : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  ⊗l : {Γ : Cxt} {A B : Fma} {C : Pos}
        (f : just A ∣ B ∷ Γ ⊢li C) →
     -------------------------------------
           just (A ⊗ B) ∣ Γ ⊢li C
@@ -130,7 +87,7 @@ data _∣_⊢li_ where
        (f : - ∣ Γ ⊢li C) →
     -------------------------
             just I ∣ Γ ⊢li C
-  ∨l : {Γ : Cxt} {A B : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  ∨l : {Γ : Cxt} {A B : Fma} {C : Pos}
       (f : just A ∣ Γ ⊢li C) (g : just B ∣ Γ ⊢li C) → 
       -----------------------------------------
            just (A ∨ B) ∣ Γ ⊢li C
@@ -143,7 +100,7 @@ data _∣_⊢f_ where
   ax : {X : At} → 
        (just (` X) , _) ∣ [] ⊢f (` X , _)
   Ir : (- , _) ∣ [] ⊢f (I , _)
-  pass : {Γ : Cxt} {A : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  pass : {Γ : Cxt} {A : Fma} {C : Pos}
          (f : just A ∣ Γ ⊢li C) → 
          --------------------------------
               (- , _) ∣ A ∷ Γ ⊢f C
@@ -152,11 +109,11 @@ data _∣_⊢f_ where
          (f : l ∣ S ∣ Γ ⊢riT A) (g : - ∣ Δ  ⊢ri B) → 
          -----------------------------------
               S ∣ Γ' ⊢f (A ⊗ B , _)
-  ∧l₁ : {Γ : Cxt} {A B : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  ∧l₁ : {Γ : Cxt} {A B : Fma} {C : Pos}
         (f : just A ∣ Γ ⊢li C) → 
         --------------------------------
              (just (A ∧ B) , _) ∣ Γ ⊢f C
-  ∧l₂ : {Γ : Cxt} {A B : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  ∧l₂ : {Γ : Cxt} {A B : Fma} {C : Pos}
         (f : just B ∣ Γ ⊢li C) → 
         --------------------------------
              (just (A ∧ B) , _) ∣ Γ ⊢f C
@@ -175,7 +132,7 @@ data _∣_∣_⊢fT_ where
   ax : {X : At} → 
        R ∣ (just (` X) , _) ∣ [] ⊢fT (` X , _)
   Ir : R ∣ (- , _) ∣ [] ⊢fT (I , _)
-  passT : {Ω : Cxt} {A : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  passT : {Ω : Cxt} {A : Fma} {C : Pos}
            (f : just A ∣ Ω ⊢li C) → 
            -------------------------------
                P ∣ (- , _) ∣ A ∷ Ω ⊢fT C
@@ -184,11 +141,11 @@ data _∣_∣_⊢fT_ where
          (f : l ∣ S ∣ Γ ⊢riT A) (g : - ∣ Δ ⊢ri B) → 
          -----------------------------------
               R ∣ S ∣ Γ' ⊢fT (A ⊗ B , _)
-  ∧l₁T : {Γ : Cxt} {A B : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  ∧l₁T : {Γ : Cxt} {A B : Fma} {C : Pos}
         (f : just A ∣ Γ ⊢li C) → 
         --------------------------------
               C₁ ∣ (just (A ∧ B) , _) ∣ Γ ⊢fT C
-  ∧l₂T : {Γ : Cxt} {A B : Fma} {C : Pos} {p : T ⌊(isPosDec C)⌋}
+  ∧l₂T : {Γ : Cxt} {A B : Fma} {C : Pos}
         (f : just B ∣ Γ ⊢li C) → 
         --------------------------------
              C₂ ∣ (just (A ∧ B) , _) ∣ Γ ⊢fT C
@@ -761,12 +718,10 @@ data _∣_∣_⊢fT_ where
 -- ⊗l-ri (∧r f f₁) = ∧r (⊗l-ri f) (⊗l-ri f₁)
 -- ⊗l-ri (li2ri f) = li2ri (⊗l f)
 
-∨l-ri : {Γ : Cxt} {A B C : Fma}
-        (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C) → 
-        --------------------------------------------
-                just (A ∨ B) ∣ Γ ⊢ri C
-∨l-ri (∧r f f₁) (∧r g g₁) = {!   !}
-∨l-ri (li2ri {p = p₁} f) (li2ri {p = p} f₁) = li2ri (∨l f {!True (isPosDec (pos C , snd))   !})              
+-- ∨l-ri : {Γ : Cxt} {A B C : Fma}
+--         (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C) → 
+--         --------------------------------------------
+--                 just (A ∨ B) ∣ Γ ⊢ri C
 -- ∨l-ri (∧r f f₁) (∧r g g₁) = ∧r (∨l-ri f g) (∨l-ri f₁ g₁)
 -- ∨l-ri (li2ri {C = .(pos (` x , snd₁)) , snd} f) (li2ri {C = ` x , snd₁} g) = li2ri (∨l f g)
 -- ∨l-ri (li2ri {C = .(pos (I , snd₁)) , snd} f) (li2ri {C = I , snd₁} g) = li2ri (∨l f g)
