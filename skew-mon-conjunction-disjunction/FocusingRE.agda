@@ -225,12 +225,23 @@ match-fT S Γ (t , p) = t ∣ S ∣ Γ ⊢fT p
 fsDist : {S : Irr} {Γ : Cxt} {Θ : List (Tag × Pos)}
   → (Φ Ψ : List Pos) (fs : All (match-fT S Γ) Θ) (eq : Φ ++ Ψ ≡ mapList (λ x → proj₂ x) Θ)
   → Σ (List (Tag × Pos)) λ Θ₁ → Σ (List (Tag × Pos)) λ Θ₂ 
-    → All (match-fT S Γ) Θ₁ × All (match-fT S Γ) Θ₂ × Θ ≡ Θ₁ ++ Θ₂ × Φ ≡ mapList (λ x → proj₂ x) Θ₁ × Ψ ≡ mapList (λ x → proj₂ x) Θ₂
-fsDist [] [] [] refl = [] , [] , [] , [] , refl , refl , refl 
-fsDist [] (A ∷ Ψ) (f ∷ fs) refl = [] , _ ∷ _ , [] , f ∷ fs , refl , refl , refl
+    → Σ (All (match-fT S Γ) Θ₁) λ fs1 → Σ (All (match-fT S Γ) Θ₂) λ fs2 →  Σ (Θ₁ ++ Θ₂ ≡ Θ) λ eq1 →  Φ ≡ mapList (λ x → proj₂ x) Θ₁ × Ψ ≡ mapList (λ x → proj₂ x) Θ₂
+      × fs ≡ subst (λ x → All (match-fT S Γ) x) eq1 (All++ fs1 fs2)
+fsDist [] [] [] refl = [] , [] , [] , [] , refl , refl , refl , refl
+fsDist [] (A ∷ Ψ) (f ∷ fs) refl = [] , _ ∷ _ , [] , f ∷ fs , refl , refl , refl , refl
 fsDist (x ∷ Φ) Ψ (f ∷ fs) eq with fsDist Φ Ψ fs (proj₂ (inj∷ eq))
-fsDist (._ ∷ .(mapList (λ x → proj₂ x) Θ₁)) .(mapList (λ x → proj₂ x) Θ₂) (f ∷ fs) refl | Θ₁ , Θ₂ , fs1 , fs2 , refl , refl , refl = 
-  _ ∷ Θ₁ , Θ₂ , f ∷ fs1 , fs2 , refl , refl , refl
+fsDist (._ ∷ .(mapList (λ x → proj₂ x) Θ₁)) .(mapList (λ x → proj₂ x) Θ₂) (f ∷ fs) refl | Θ₁ , Θ₂ , fs1 , fs2 , refl , refl , refl , refl = 
+  _ ∷ Θ₁ , Θ₂ , f ∷ fs1 , fs2 , refl , refl , refl , refl
+
+fsDist-refl : {S : Irr} {Γ : Cxt}
+  → {Φ Ψ : List (Tag × Pos)}
+  → (fs : All (match-fT S Γ) Φ)
+  → (gs : All (match-fT S Γ) Ψ)
+  → fsDist (mapList proj₂ Φ) (mapList proj₂ Ψ) (All++ fs gs) refl ≡ (Φ , Ψ , fs , gs , refl , refl , refl , refl)
+fsDist-refl [] [] = refl
+fsDist-refl [] (g ∷ gs) = refl
+fsDist-refl (f ∷ fs) gs rewrite fsDist-refl fs gs = refl
+-- {-# REWRITE fsDist-refl #-}
 
 ∧rT* : {S : Irr} {Γ : Cxt} {A : Fma}
   → {Θ : List (Tag × Pos)} {Φ : List Pos}
@@ -239,7 +250,7 @@ fsDist (._ ∷ .(mapList (λ x → proj₂ x) Θ₁)) .(mapList (λ x → proj�
   → (eq : Φ ≡ mapList (λ x → proj₂ x) Θ)
   → (mapList (λ x → proj₁ x) Θ) ∣ S ∣ Γ ⊢riT A
 ∧rT* fs (conj {Φ} {Ψ} {A' = A} {B' = B} SF1 SF2) eq with fsDist (A ∷ Φ) (B ∷ Ψ) fs eq
-∧rT* fs (conj {.(mapList (λ x → proj₂ x) Θ₁)} {.(mapList (λ x → proj₂ x) Θ₂)} {A' = _} {B' = .(proj₂ tp2)} SF1 SF2) refl | tp1 ∷ Θ₁ , tp2 ∷ Θ₂ , f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl = 
+∧rT* fs (conj {.(mapList (λ x → proj₂ x) Θ₁)} {.(mapList (λ x → proj₂ x) Θ₂)} {A' = _} {B' = .(proj₂ tp2)} SF1 SF2) refl | tp1 ∷ Θ₁ , tp2 ∷ Θ₂ , f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl , refl = 
   ∧rT (∧rT* (f1 ∷ fs1) SF1 refl) (∧rT* (f2 ∷ fs2) SF2 refl)
 ∧rT* (f ∷ []) stop refl = f2riT f
 
@@ -513,6 +524,16 @@ fsDist-white [] .(_ ∷ _) (f ∷ fs) refl = [] , _ ∷ _ , refl
 fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ fs) eq with fsDist-white Θ₁ Θ₂ fs (proj₂ (inj∷ eq))
 fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ .(subst (All (_∣_⊢li_ _ _)) refl (All++ fs1 fs2))) refl | fs1 , fs2 , refl = f ∷ fs1 , fs2 , refl
 
+fsDist-white-refl : {S : Stp} {Γ : Cxt}
+  → {Φ Ψ : List Pos}
+  → (fs : All (λ C → S ∣ Γ ⊢li C) Φ)
+  → (gs : All (λ C → S ∣ Γ ⊢li C) Ψ)
+  → fsDist-white Φ Ψ (All++ fs gs) refl ≡ (fs , gs , refl)
+fsDist-white-refl [] [] = refl
+fsDist-white-refl [] (g ∷ gs) = refl
+fsDist-white-refl (f ∷ fs) gs rewrite fsDist-white-refl fs gs = refl
+{-# REWRITE fsDist-white-refl #-}
+
 ∧r* : {S : Stp} {Γ : Cxt} {A : Fma}
   → {Φ : List Pos} 
   -- {Ψ : List Fma}
@@ -525,16 +546,6 @@ fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ .(subst (All (_∣_⊢li_ _ _)) refl (Al
 -- eq with fsDist-white (A ∷ Φ) (B ∷ Ψ) fs eq
 -- ... | P1 ∷ Θ1 , P2 ∷ Θ2 , fs1 , fs2 , refl , refl , refl = ∧r (∧r* fs1 SF1 refl) (∧r* fs2 SF2 refl) -- ∧r (∧r* fs1 SF1 eq2) (∧r* fs2 SF2 eq3)
 ∧r* (f ∷ []) stop = li2ri f
-
-fsDist-white-refl : {S : Stp} {Γ : Cxt}
-  → {Φ Ψ : List Pos}
-  → (fs : All (λ C → S ∣ Γ ⊢li C) Φ)
-  → (gs : All (λ C → S ∣ Γ ⊢li C) Ψ)
-  → fsDist-white Φ Ψ (All++ fs gs) refl ≡ (fs , gs , refl)
-fsDist-white-refl [] [] = refl
-fsDist-white-refl [] (g ∷ gs) = refl
-fsDist-white-refl (f ∷ fs) gs rewrite fsDist-white-refl fs gs = refl
-{-# REWRITE fsDist-white-refl #-}
 
 f2fs : {S : Stp} {Γ : Cxt} {A : Fma}
   → (f : S ∣ Γ ⊢ri A)

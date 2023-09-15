@@ -142,22 +142,22 @@ data _≗_ : {S  : Stp}{Γ : Cxt}{A : Fma} → S ∣ Γ ⊢ A → S ∣ Γ ⊢ A
     → {f : just A' ∣ Γ ⊢ A} {g : just B' ∣ Γ ⊢ A}
     → ∨r₁ {B = B} (∨l f g) ≗ ∨l (∨r₁ f) (∨r₁ g)
   ∨r₂pass : {Γ : Cxt} {A A' B : Fma} 
-    → {f : just A' ∣ Γ ⊢ A}
+    → {f : just A' ∣ Γ ⊢ B}
     → ∨r₂ {A = A} (pass f) ≗ pass (∨r₂ f)
   ∨r₂Il : {Γ : Cxt} {A B : Fma}
-    → {f : - ∣ Γ ⊢ A}
+    → {f : - ∣ Γ ⊢ B}
     → ∨r₂ {A = A} (Il f) ≗ Il (∨r₂ f)
   ∨r₂⊗l : {Γ : Cxt} {A A' B B' : Fma}
-    → {f : just A' ∣ B' ∷ Γ ⊢ A}
+    → {f : just A' ∣ B' ∷ Γ ⊢ B}
     → ∨r₂ {A = A} (⊗l f) ≗ ⊗l (∨r₂ f)
   ∨r₂∧l₁ : {Γ : Cxt} {A A' B B' : Fma} 
-    → {f : just A' ∣ Γ ⊢ A}
+    → {f : just A' ∣ Γ ⊢ B}
     → ∨r₂ {A = A} (∧l₁ {B = B'} f) ≗ ∧l₁ (∨r₂ f)
   ∨r₂∧l₂ : {Γ : Cxt} {A A' B B' : Fma} 
-    → {f : just B' ∣ Γ ⊢ A}
+    → {f : just B' ∣ Γ ⊢ B}
     → ∨r₂ {A = A} (∧l₂ {A = A'} f) ≗ ∧l₂ (∨r₂ f)
   ∨r₂∨l : {Γ : Cxt} {A A' B B' : Fma}
-    → {f : just A' ∣ Γ ⊢ A} {g : just B' ∣ Γ ⊢ A}
+    → {f : just A' ∣ Γ ⊢ B} {g : just B' ∣ Γ ⊢ B}
     → ∨r₂ {A = A} (∨l f g) ≗ ∨l (∨r₂ f) (∨r₂ g)
 ≡to≗ : {S : Stp} {Γ : Cxt} {C : Fma}
   → {f g : S ∣ Γ ⊢ C}
