@@ -17,18 +17,17 @@ open import Data.Bool hiding (_∧_; _∨_)
 open import Utilities
 open import Formulae
 open import SeqCalc
-open import FocusingRE
+open import Focusing
+open import CheckFocus
+open import TagUntag
+open import FocusingProperties
+
 
 {-
-In this file, we show that every derivation in SeqCalc is ≗-to the its normal form, 
+We show that every derivation in SeqCalc is ≗-to the its normal form, 
 i.e. emb-ri (focus f) ≗ f
 -}
 
--- -- functions splitting a lists of derivations in SeqCalc
-{-
-In general, succedents should not be in the form of pos C,
-but in our case, this limited version is enough.
--}
 fsDist-seq : {S : Stp} {Γ : Cxt} {Θ : List Pos}
   → (Θ₁ Θ₂ : List Pos) (fs : All (λ C → S ∣ Γ ⊢ pos C) Θ) (eq : Θ₁ ++ Θ₂ ≡ Θ)
   → Σ (All (λ C → S ∣ Γ ⊢ pos C) Θ₁) λ fs1 → Σ (All (λ C → S ∣ Γ ⊢ pos C) Θ₂) λ fs2 → fs ≡ subst (λ x → All (λ C → S ∣ Γ ⊢ pos C) x) eq (All++ fs1 fs2)
@@ -52,7 +51,7 @@ fsDist-seq-refl (f ∷ fs) gs rewrite fsDist-seq-refl fs gs = refl
   → (fs : All (λ C → S ∣ Γ ⊢ pos C) Φ)
   → (SF : SubFmas Φ A)
   → S ∣ Γ ⊢ A
-∧r*-seq fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-seq (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-seq Φ Ψ fs refl
 ... | fs1 , fs2 , refl = ∧r (∧r*-seq fs1 SF1) (∧r*-seq fs2 SF2)
 ∧r*-seq (f ∷ []) stop = f
 
@@ -69,6 +68,13 @@ emb-li-fs-All++ : {S : Stp} {Γ : Cxt} {Φ Ψ : List Pos}
   → emb-li-fs (All++ fs1 fs2) ≡ All++ (emb-li-fs fs1) (emb-li-fs fs2)
 emb-li-fs-All++ [] fs2 = refl
 emb-li-fs-All++ (f1 ∷ fs1) fs2 = cong (emb-li f1 ∷_) (emb-li-fs-All++ fs1 fs2)
+
+emb-fT-fs : {S : Irr} {Γ : Cxt}
+  → {Φ : List (Tag × Pos)}
+  → (fs : All (match-fT S Γ) Φ)
+  → All (λ C → irr S ∣ Γ ⊢ pos C) (mapList proj₂ Φ)
+emb-fT-fs [] = []
+emb-fT-fs (f ∷ fs) = emb-fT f ∷ emb-fT-fs fs
 
 ⊗l-inv-fs-All++ : {Γ : Cxt} {A B : Fma}
   → {Φ Ψ : List Pos}
@@ -134,34 +140,12 @@ pass-fs-All++ : {Γ : Cxt} {A : Fma}
 pass-fs-All++ [] fs2 = refl
 pass-fs-All++ (f1 ∷ fs1) fs2 = cong (pass f1 ∷_) (pass-fs-All++ fs1 fs2)
 
-untagF-fs-All++ : {S : Irr} {Γ : Cxt}
-  → {Ψ1 Ψ2 : List (Tag × Pos)} {Φ1 Φ2 : List Pos}
-  → (fs1 : All (match-fT S Γ) Ψ1) 
-  → (fs2 : All (match-fT S Γ) Ψ2) 
-  → (eq1 : Φ1 ≡ mapList proj₂ Ψ1)
-  → (eq2 : Φ2 ≡ mapList proj₂ Ψ2)
-  → untagF-fs (All++ fs1 fs2) (cong₂ _++_ eq1 eq2) ≡ All++ (untagF-fs fs1 eq1) (untagF-fs fs2 eq2)
-untagF-fs-All++ [] fs2 refl refl = refl
-untagF-fs-All++ (f1 ∷ fs1) fs2 refl refl = cong (untagF f1 ∷_) (untagF-fs-All++ fs1 fs2 refl refl)
-
-emb-fTemb-f : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
-  → (f : t ∣ S ∣ Γ ⊢fT C)
-  → emb-fT f ≗ emb-f (untagF f)
-emb-fTemb-f ax = refl
-emb-fTemb-f Ir = refl
-emb-fTemb-f (passT f) = refl
-emb-fTemb-f (⊗rT l ok refl f g) = refl
-emb-fTemb-f (∧l₁T f) = refl
-emb-fTemb-f (∧l₂T f) = refl
-emb-fTemb-f (∨r₁T l ok f) = refl
-emb-fTemb-f (∨r₂T l ok f) = refl
-
 emb∧r*-seq : {S : Stp} {Γ : Cxt} {A : Fma}
   → {Φ : List Pos}
   → (fs : All (_∣_⊢li_ S Γ) Φ) 
   → (SF : SubFmas Φ A)
   → ∧r*-seq (emb-li-fs fs) SF ≗ emb-ri (∧r* fs SF)
-emb∧r*-seq fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+emb∧r*-seq fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl 
   rewrite emb-li-fs-All++ fs1 fs2 | fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) = 
     ∧r (emb∧r*-seq fs1 SF1) (emb∧r*-seq fs2 SF2)
@@ -172,7 +156,7 @@ emb∧r*-seq (f ∷ []) stop = refl
   → (fs : All (_∣_⊢li_ (just (A ⊗ B)) Γ) Φ)
   → (SF : SubFmas Φ C)
   → ⊗l (∧r*-seq (emb-li-fs (⊗l-inv-fs fs)) SF) ≗ ∧r*-seq (emb-li-fs fs) SF
-∧r*-seq-⊗l fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq-⊗l fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl 
   rewrite emb-li-fs-All++ fs1 fs2 | 
           fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) | 
@@ -187,7 +171,7 @@ emb∧r*-seq (f ∷ []) stop = refl
   → (fs : All (_∣_⊢li_ (just I) Γ) Φ)
   → (SF : SubFmas Φ A)
   → Il (∧r*-seq (emb-li-fs (Il-inv-fs fs)) SF) ≗ ∧r*-seq (emb-li-fs fs) SF
-∧r*-seq-Il fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq-Il fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl 
   rewrite emb-li-fs-All++ fs1 fs2 | 
           fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) | 
@@ -203,7 +187,7 @@ emb∧r*-seq (f ∷ []) stop = refl
   → (SF : SubFmas Φ C)
   → ∨l (∧r*-seq (emb-li-fs (∨l-inv-fs₁ fs)) SF) (∧r*-seq (emb-li-fs (∨l-inv-fs₂ fs)) SF) 
     ≗ ∧r*-seq (emb-li-fs fs) SF
-∧r*-seq-∨l fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq-∨l fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl
   rewrite emb-li-fs-All++ fs1 fs2 | 
           fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) | 
@@ -222,7 +206,7 @@ emb∧r*-seq (f ∷ []) stop = refl
   → (SF : SubFmas Φ C)
   → ∧l₁ {B = B} (∧r*-seq (emb-li-fs fs) SF) ≗
       ∧r*-seq (emb-li-fs (f2li-fs (∧l₁-fs fs))) SF
-∧r*-seq-∧l₁ {B = B} fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq-∧l₁ {B = B} fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl 
   rewrite emb-li-fs-All++ fs1 fs2 | 
           fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) | 
@@ -239,7 +223,7 @@ emb∧r*-seq (f ∷ []) stop = refl
   → (SF : SubFmas Φ C)
   → ∧l₂ {A = A} (∧r*-seq (emb-li-fs fs) SF) ≗
       ∧r*-seq (emb-li-fs (f2li-fs (∧l₂-fs fs))) SF
-∧r*-seq-∧l₂ {A = A} fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq-∧l₂ {A = A} fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl 
   rewrite emb-li-fs-All++ fs1 fs2 | 
           fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) | 
@@ -256,7 +240,7 @@ emb∧r*-seq (f ∷ []) stop = refl
   → (SF : SubFmas Φ C)
   → pass (∧r*-seq (emb-li-fs fs) SF) ≗
       ∧r*-seq (emb-li-fs (f2li-fs (pass-fs fs))) SF
-∧r*-seq-pass fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) with fsDist-white (A' ∷ Φ) (B' ∷ Ψ) fs refl
+∧r*-seq-pass fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
 ... | fs1 , fs2 , refl 
   rewrite emb-li-fs-All++ fs1 fs2 | 
           fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) | 
@@ -268,38 +252,33 @@ emb∧r*-seq (f ∷ []) stop = refl
 ∧r*-seq-pass (f  ∷ []) stop = refl
 
 ∧r*-seq-emb-riT : {S : Irr} {Γ : Cxt} {A : Fma} 
-  → {Φ : List (Tag × Pos)} {Ψ : List Pos}
-  → (fs : All (match-fT S Γ) Φ)
-  → (SF : SubFmas Ψ A)
-  → (eq : Ψ ≡ mapList proj₂ Φ)
-  → emb-riT (∧rT* fs SF eq) ≗
-      ∧r*-seq (emb-li-fs (f2li-fs (untagF-fs fs eq))) SF
-∧r*-seq-emb-riT fs (conj {Φ} {Ψ} {A' = A'} {B'} SF1 SF2) eq with fsDist (A' ∷ Φ) (B' ∷ Ψ) fs eq
-∧r*-seq-emb-riT .(subst (All (match-fT _ _)) refl (All++ (f1 ∷ fs1) (f2 ∷ fs2))) (conj {.(mapList (λ x₁ → proj₂ x₁) Θ1)} {.(mapList (λ x₁ → proj₂ x₁) Θ2)} {A' = _} {.(` x , tt)} SF1 SF2) refl | (t1 , A1) ∷ Θ1 , (t2 , ` x , tt) ∷ Θ2 , f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl , refl 
-  rewrite untagF-fs-All++ fs1 (f2 ∷ fs2) refl refl |
-          f2li-fs-All++ (untagF-fs fs1 refl) (untagF f2 ∷ untagF-fs fs2 refl) | 
-          emb-li-fs-All++ (f2li-fs (untagF-fs fs1 refl)) (f2li (untagF f2) ∷ f2li-fs (untagF-fs fs2 refl)) | 
-          fsDist-seq-refl (emb-li-fs (f2li-fs (untagF-fs fs1 refl))) (emb-f (untagF f2) ∷ emb-li-fs (f2li-fs (untagF-fs fs2 refl))) = 
-            ∧r (∧r*-seq-emb-riT (f1 ∷ fs1) SF1 refl) (∧r*-seq-emb-riT (f2 ∷ fs2) SF2 refl)
-∧r*-seq-emb-riT .(subst (All (match-fT _ _)) refl (All++ (f1 ∷ fs1) (f2 ∷ fs2))) (conj {.(mapList (λ x → proj₂ x) Θ1)} {.(mapList (λ x → proj₂ x) Θ2)} {A' = _} {.(I , tt)} SF1 SF2) refl | (t1 , A1) ∷ Θ1 , (t2 , I , tt) ∷ Θ2 , f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl , refl 
-  rewrite untagF-fs-All++ fs1 (f2 ∷ fs2) refl refl |
-          f2li-fs-All++ (untagF-fs fs1 refl) (untagF f2 ∷ untagF-fs fs2 refl) | 
-          emb-li-fs-All++ (f2li-fs (untagF-fs fs1 refl)) (f2li (untagF f2) ∷ f2li-fs (untagF-fs fs2 refl)) | 
-          fsDist-seq-refl (emb-li-fs (f2li-fs (untagF-fs fs1 refl))) (emb-f (untagF f2) ∷ emb-li-fs (f2li-fs (untagF-fs fs2 refl))) = 
-            ∧r (∧r*-seq-emb-riT (f1 ∷ fs1) SF1 refl) (∧r*-seq-emb-riT (f2 ∷ fs2) SF2 refl)
-∧r*-seq-emb-riT .(subst (All (match-fT _ _)) refl (All++ (f1 ∷ fs1) (f2 ∷ fs2))) (conj {.(mapList (λ x → proj₂ x) Θ1)} {.(mapList (λ x → proj₂ x) Θ2)} {A' = _} {.(A2 ⊗ A3 , tt)} SF1 SF2) refl | (t1 , A1) ∷ Θ1 , (t2 , A2 ⊗ A3 , tt) ∷ Θ2 , f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl , refl 
-  rewrite untagF-fs-All++ fs1 (f2 ∷ fs2) refl refl |
-          f2li-fs-All++ (untagF-fs fs1 refl) (untagF f2 ∷ untagF-fs fs2 refl) | 
-          emb-li-fs-All++ (f2li-fs (untagF-fs fs1 refl)) (f2li (untagF f2) ∷ f2li-fs (untagF-fs fs2 refl)) | 
-          fsDist-seq-refl (emb-li-fs (f2li-fs (untagF-fs fs1 refl))) (emb-f (untagF f2) ∷ emb-li-fs (f2li-fs (untagF-fs fs2 refl))) = 
-            ∧r (∧r*-seq-emb-riT (f1 ∷ fs1) SF1 refl) (∧r*-seq-emb-riT (f2 ∷ fs2) SF2 refl)
-∧r*-seq-emb-riT .(subst (All (match-fT _ _)) refl (All++ (f1 ∷ fs1) (f2 ∷ fs2))) (conj {.(mapList (λ x → proj₂ x) Θ1)} {.(mapList (λ x → proj₂ x) Θ2)} {A' = _} {.(A2 ∨ A3 , tt)} SF1 SF2) refl | (t1 , A1) ∷ Θ1 , (t2 , A2 ∨ A3 , tt) ∷ Θ2 , f1 ∷ fs1 , f2 ∷ fs2 , refl , refl , refl , refl 
-  rewrite untagF-fs-All++ fs1 (f2 ∷ fs2) refl refl |
-          f2li-fs-All++ (untagF-fs fs1 refl) (untagF f2 ∷ untagF-fs fs2 refl) | 
-          emb-li-fs-All++ (f2li-fs (untagF-fs fs1 refl)) (f2li (untagF f2) ∷ f2li-fs (untagF-fs fs2 refl)) | 
-          fsDist-seq-refl (emb-li-fs (f2li-fs (untagF-fs fs1 refl))) (emb-f (untagF f2) ∷ emb-li-fs (f2li-fs (untagF-fs fs2 refl))) = 
-            ∧r (∧r*-seq-emb-riT (f1 ∷ fs1) SF1 refl) (∧r*-seq-emb-riT (f2 ∷ fs2) SF2 refl)
-∧r*-seq-emb-riT (f ∷ []) stop refl = emb-fTemb-f f
+  → {Φ : List Pos}
+  → (fs : All (_∣_⊢li_ (irr S) Γ) Φ)
+  → (SF : SubFmas Φ A)
+  -- → (eq : Ψ ≡ mapList proj₂ Φ)
+  → emb-riT (∧rT* (proj₂ (tagF-fs {S} fs)) SF refl) ≗
+      ∧r*-seq (emb-li-fs fs) SF
+∧r*-seq-emb-riT {S} fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
+... | fs1 , fs2 , refl
+  rewrite emb-li-fs-All++ fs1 fs2 | 
+          fsDist-seq-refl (emb-li-fs fs1) (emb-li-fs fs2) |
+          tagF-fs-All++ {S} fs1 fs2 |
+           fsDist-refl (proj₂ (tagF-fs {S} fs1))  (proj₂ (tagF-fs {S} fs2)) = 
+             ∧r (∧r*-seq-emb-riT fs1 SF1) (∧r*-seq-emb-riT fs2 SF2)
+∧r*-seq-emb-riT (f2li ax ∷ []) stop = refl
+∧r*-seq-emb-riT (f2li Ir ∷ []) stop = refl
+∧r*-seq-emb-riT (f2li (pass f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (just (` x) , q)) , p} (f2li {just (` x) , q} (⊗r l ok refl f g) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (just (x ∧ x₁) , q)) , p} (f2li {just (x ∧ x₁) , q} (⊗r l ok refl f g) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (- , q)) , p} (f2li { - , q} (⊗r l ok refl f g) ∷ []) stop = refl
+∧r*-seq-emb-riT (f2li (∧l₁ f) ∷ []) stop = refl
+∧r*-seq-emb-riT (f2li (∧l₂ f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (just (` x) , q)) , p} (f2li {just (` x) , q} (∨r₁ l ok f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (just (x ∧ x₁) , q)) , p} (f2li {just (x ∧ x₁) , q} (∨r₁ l ok f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (- , q)) , p} (f2li { - , q} (∨r₁ l ok f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (just (` x) , q)) , p} (f2li {just (` x) , q} (∨r₂ l ok f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (just (x ∧ x₁) , q)) , p} (f2li {just (x ∧ x₁) , q} (∨r₂ l ok f) ∷ []) stop = refl
+∧r*-seq-emb-riT {.(irr (- , q)) , p} (f2li { - , q} (∨r₂ l ok f) ∷ []) stop = refl
 
 embgen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
   → {Φ Ψ : List Pos}
@@ -323,7 +302,29 @@ embgen⊗r-li (f2li {S = S} f) fs SF refl g with check-focus {S = S} (f2li f) fs
   ∙ (~ ⊗r∧l₂ ∙ ⊗r (∧r*-seq-∧l₂ (f' ∷ fs') SF) refl) 
 ... | inj₁ (inj₂ (inj₂ (A , Γ , f' ∷ fs' , refl , refl , refl))) = pass (embgen⊗r-li f' fs' SF refl g) 
   ∙ (~ ⊗rpass ∙ ⊗r (∧r*-seq-pass (f' ∷ fs') SF) refl) 
-... | inj₂ (tp ∷ Ψ , f ∷ fs' , refl , refl , ok) = ⊗r (∧r*-seq-emb-riT (f ∷ fs') SF refl) refl
+embgen⊗r-li {.(irr (just (` _) , tt))} (f2li {S = .(just (` _)) , .tt} ax) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ⊗r (∧r*-seq-emb-riT ((f2li ax) ∷ fs) SF) refl 
+embgen⊗r-li {.(irr (- , tt))} (f2li {S = .- , .tt} Ir) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ⊗r (∧r*-seq-emb-riT ((f2li Ir) ∷ fs) SF) refl 
+embgen⊗r-li {.(irr (- , tt))} (f2li {S = .- , .tt} (pass f)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ⊗r (∧r*-seq-emb-riT ((f2li (pass f)) ∷ fs) SF) refl 
+embgen⊗r-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (⊗r l ok₁ eq f g)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ⊗r (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (⊗r l ok₁ eq f g)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ⊗r (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (- , snd))} (f2li {S = - , snd} (⊗r l ok₁ eq f g)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ⊗r (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (just (_ ∧ _) , tt))} (f2li {S = .(just (_ ∧ _)) , .tt} (∧l₁ f)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = ⊗r (∧r*-seq-emb-riT ((f2li (∧l₁ f)) ∷ fs) SF) refl 
+embgen⊗r-li {.(irr (just (_ ∧ _) , tt))} (f2li {S = .(just (_ ∧ _)) , .tt} (∧l₂ f)) fs SF refl g' | inj₂ (.((C₂ , _) ∷ proj₁ (tagF-fs fs)) , .(∧l₂T f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ⊗r (∧r*-seq-emb-riT ((f2li (∧l₂ f)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (∨r₁ l ok₁ f)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ⊗r (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (∨r₁ l ok₁ f)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ⊗r (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (- , snd))} (f2li {S = - , snd} (∨r₁ l ok₁ f)) fs SF refl g' | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ⊗r (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (∨r₂ l ok₁ f)) fs SF refl g' | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ⊗r (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (∨r₂ l ok₁ f)) fs SF refl g' | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ⊗r (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF) refl
+embgen⊗r-li {.(irr (- , snd))} (f2li {S = - , snd} (∨r₂ l ok₁ f)) fs SF refl g' | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ⊗r (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF) refl
 
 embgen∨r₁-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
   → {Φ Ψ : List Pos}
@@ -346,7 +347,29 @@ embgen∨r₁-li (f2li {S = S} f) fs SF refl with check-focus {S = S} (f2li f) f
   ∙ (~ ∨r₁∧l₂ ∙ ∨r₁ (∧r*-seq-∧l₂ (f' ∷ fs') SF)) 
 ... | inj₁ (inj₂ (inj₂ (A , Γ , f' ∷ fs' , refl , refl , refl))) = pass (embgen∨r₁-li f' fs' SF refl) 
   ∙ (~ ∨r₁pass ∙ ∨r₁ (∧r*-seq-pass (f' ∷ fs') SF)) 
-... | inj₂ (tp ∷ Ψ , f ∷ fs' , refl , refl , ok) = ∨r₁ (∧r*-seq-emb-riT (f ∷ fs') SF refl)
+embgen∨r₁-li {.(irr (just (` _) , tt))} (f2li {S = .(just (` _)) , .tt} ax) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₁ (∧r*-seq-emb-riT ((f2li ax) ∷ fs) SF) 
+embgen∨r₁-li {.(irr (- , tt))} (f2li {S = .- , .tt} Ir) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₁ (∧r*-seq-emb-riT ((f2li Ir) ∷ fs) SF) 
+embgen∨r₁-li {.(irr (- , tt))} (f2li {S = .- , .tt} (pass f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (pass f)) ∷ fs) SF) 
+embgen∨r₁-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (⊗r l ok₁ eq f g)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (⊗r l ok₁ eq f g)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (- , snd))} (f2li {S = - , snd} (⊗r l ok₁ eq f g)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (just (_ ∧ _) , tt))} (f2li {S = .(just (_ ∧ _)) , .tt} (∧l₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = ∨r₁ (∧r*-seq-emb-riT ((f2li (∧l₁ f)) ∷ fs) SF) 
+embgen∨r₁-li {.(irr (just (_ ∧ _) , tt))} (f2li {S = .(just (_ ∧ _)) , .tt} (∧l₂ f)) fs SF refl | inj₂ (.((C₂ , _) ∷ proj₁ (tagF-fs fs)) , .(∧l₂T f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₁ (∧r*-seq-emb-riT ((f2li (∧l₂ f)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (∨r₁ l ok₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (∨r₁ l ok₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (- , snd))} (f2li {S = - , snd} (∨r₁ l ok₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₁ (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (∨r₂ l ok₁ f)) fs SF refl | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₁ (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (∨r₂ l ok₁ f)) fs SF refl | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₁ (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF)
+embgen∨r₁-li {.(irr (- , snd))} (f2li {S = - , snd} (∨r₂ l ok₁ f)) fs SF refl | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₁ (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF)
 
 embgen∨r₂-li : {S : Stp} {Γ : Cxt} {A B : Fma} {C : Pos}
   → {Φ Ψ : List Pos}
@@ -362,32 +385,58 @@ embgen∨r₂-li (Il f) fs SF refl =
 embgen∨r₂-li (∨l f1 f2) fs SF refl = 
   ∨l (embgen∨r₂-li f1 (∨l-inv-fs₁ fs) SF refl) (embgen∨r₂-li f2 (∨l-inv-fs₂ fs) SF refl) 
     ∙ (~ ∨r₂∨l ∙ ∨r₂ (∧r*-seq-∨l  (∨l f1 f2 ∷ fs) SF))
-embgen∨r₂-li (f2li {S = S} f) fs SF refl with check-focus {S = S} (f2li f) fs
+embgen∨r₂-li {S1} (f2li {S = S} f) fs SF refl with check-focus {S = S} (f2li f) fs
 ... | inj₁ (inj₁ (A , B , f' ∷ fs' , refl , refl)) = ∧l₁ (embgen∨r₂-li f' fs' SF refl) 
   ∙ (~ ∨r₂∧l₁ ∙ ∨r₂ (∧r*-seq-∧l₁ (f' ∷ fs') SF)) 
 ... | inj₁ (inj₂ (inj₁ (A , B , f' ∷ fs' , refl , refl))) = ∧l₂ (embgen∨r₂-li f' fs' SF refl) 
   ∙ (~ ∨r₂∧l₂ ∙ ∨r₂ (∧r*-seq-∧l₂ (f' ∷ fs') SF)) 
 ... | inj₁ (inj₂ (inj₂ (A , Γ , f' ∷ fs' , refl , refl , refl))) = pass (embgen∨r₂-li f' fs' SF refl) 
   ∙ (~ ∨r₂pass ∙ ∨r₂ (∧r*-seq-pass (f' ∷ fs') SF)) 
-... | inj₂ (tp ∷ Ψ , f ∷ fs' , refl , refl , ok) = ∨r₂ (∧r*-seq-emb-riT (f ∷ fs') SF refl)
+embgen∨r₂-li {.(irr (just (` _) , tt))} (f2li {S = .(just (` _)) , .tt} ax) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₂ (∧r*-seq-emb-riT ((f2li ax) ∷ fs) SF) 
+embgen∨r₂-li {.(irr (- , tt))} (f2li {S = .- , .tt} Ir) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₂ (∧r*-seq-emb-riT ((f2li Ir) ∷ fs) SF) 
+embgen∨r₂-li {.(irr (- , tt))} (f2li {S = .- , .tt} (pass f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (pass f)) ∷ fs) SF) 
+embgen∨r₂-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (⊗r l ok₁ eq f g)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (⊗r l ok₁ eq f g)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (- , snd))} (f2li {S = - , snd} (⊗r l ok₁ eq f g)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (⊗r l ok₁ eq f g)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (just (_ ∧ _) , tt))} (f2li {S = .(just (_ ∧ _)) , .tt} (∧l₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = ∨r₂ (∧r*-seq-emb-riT ((f2li (∧l₁ f)) ∷ fs) SF) 
+embgen∨r₂-li {.(irr (just (_ ∧ _) , tt))} (f2li {S = .(just (_ ∧ _)) , .tt} (∧l₂ f)) fs SF refl | inj₂ (.((C₂ , _) ∷ proj₁ (tagF-fs fs)) , .(∧l₂T f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₂ (∧r*-seq-emb-riT ((f2li (∧l₂ f)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (∨r₁ l ok₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (∨r₁ l ok₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) = 
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (- , snd))} (f2li {S = - , snd} (∨r₁ l ok₁ f)) fs SF refl | inj₂ (.(_ ∷ _) , f'' ∷ fs' , refl , refl , ok) =
+  ∨r₂ (∧r*-seq-emb-riT ((f2li (∨r₁ l ok₁ f)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (just (` x) , snd))} (f2li {S = just (` x) , snd} (∨r₂ l ok₁ f)) fs SF refl | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₂ (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (just (x ∧ x₁) , snd))} (f2li {S = just (x ∧ x₁) , snd} (∨r₂ l ok₁ f)) fs SF refl | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₂ (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF)
+embgen∨r₂-li {.(irr (- , snd))} (f2li {S = - , snd} (∨r₂ l ok₁ f)) fs SF refl | inj₂ (.((R , _ ∨ _ , tt) ∷ proj₁ (tagF-fs fs)) , .(∨r₂T l ok₁ f) ∷ .(proj₂ (tagF-fs fs)) , refl , refl , ok) = ∨r₂ (∧r*-seq-emb-riT ((f2li (∨r₂ l ok₁ f)) ∷ fs) SF)
+
 
 emb⊗r : {S : Stp} {Γ Δ : Cxt} {A B : Fma}
   → (f : S ∣ Γ ⊢ri A) (g : - ∣ Δ ⊢ri B)
   → emb-ri (⊗r-ri f g) ≗ ⊗r (emb-ri f) (emb-ri g)
 emb⊗r f g with f2fs f
-... | Φ , f ∷ fs , SF , refl = embgen⊗r-li f fs SF refl g ∙ ⊗r (emb∧r*-seq (f ∷ fs) SF) refl
+... | .[] , [] , SF , refl = ⊥-elim (SubFmas[]-⊥ SF refl)
+... | .(_ ∷ _) , f ∷ fs , SF , refl =  embgen⊗r-li f fs SF refl g ∙ ⊗r (emb∧r*-seq (f ∷ fs) SF) refl
 
 emb∨r₁ : {S : Stp} {Γ : Cxt} {A B : Fma}
   → (f : S ∣ Γ ⊢ri A)
   → emb-ri (∨r₁-ri {B = B} f) ≗ ∨r₁ (emb-ri f)
 emb∨r₁ {B = B} f with f2fs f
-... | Φ , f ∷ fs , SF , refl = embgen∨r₁-li f fs SF refl ∙ ∨r₁ {B = B} (emb∧r*-seq (f ∷ fs) SF)
+... | .[] , [] , SF , refl = ⊥-elim (SubFmas[]-⊥ SF refl)
+... | .(_ ∷ _) , f ∷ fs , SF , refl =  embgen∨r₁-li f fs SF refl ∙ ∨r₁ (emb∧r*-seq (f ∷ fs) SF)
 
 emb∨r₂ : {S : Stp} {Γ : Cxt} {A B : Fma}
   → (f : S ∣ Γ ⊢ri B)
   → emb-ri (∨r₂-ri {A = A} f) ≗ ∨r₂ (emb-ri f)
 emb∨r₂ {A = A} f with f2fs f
-... | Φ , f ∷ fs , SF , refl = embgen∨r₂-li f fs SF refl ∙ ∨r₂ {A = A} (emb∧r*-seq (f ∷ fs) SF)
+... | .[] , [] , SF , refl = ⊥-elim (SubFmas[]-⊥ SF refl)
+... | .(_ ∷ _) , f ∷ fs , SF , refl = embgen∨r₂-li f fs SF refl ∙ ∨r₂ (emb∧r*-seq (f ∷ fs) SF)
 
 emb∨l : {Γ : Cxt} {A B C : Fma}
   → (f : just A ∣ Γ ⊢ri C) (g : just B ∣ Γ ⊢ri C)
@@ -454,4 +503,4 @@ embfocus (∧l₁ f) = emb∧l₁ (focus f) ∙ ∧l₁ (embfocus f)
 embfocus (∧l₂ f) = emb∧l₂ (focus f) ∙ ∧l₂ (embfocus f)
 embfocus (∨r₁ f) = emb∨r₁ (focus f) ∙ ∨r₁ (embfocus f)
 embfocus (∨r₂ f) = emb∨r₂ (focus f) ∙ ∨r₂ (embfocus f)
-embfocus (∨l f g) = emb∨l (focus f) (focus g) ∙ ∨l (embfocus f) (embfocus g)    
+embfocus (∨l f g) = emb∨l (focus f) (focus g) ∙ ∨l (embfocus f) (embfocus g)        
