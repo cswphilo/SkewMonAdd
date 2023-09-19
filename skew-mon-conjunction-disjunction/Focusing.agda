@@ -206,39 +206,6 @@ SubFmas[]-⊥ (conj {[]} SF SF₁) eq = SubFmas[]-⊥ SF refl
 match-fT : (S : Irr) (Γ : Cxt) (Φ : Tag × Pos) → Set
 match-fT S Γ (t , p) = t ∣ S ∣ Γ ⊢fT p
 
--- To distribute a list of Tags and Positive formulas
-fsDist : {S : Irr} {Γ : Cxt} {Θ : List (Tag × Pos)}
-  → (Φ Ψ : List Pos) (fs : All (match-fT S Γ) Θ) (eq : Φ ++ Ψ ≡ mapList (λ x → proj₂ x) Θ)
-  → Σ (List (Tag × Pos)) λ Θ₁ → Σ (List (Tag × Pos)) λ Θ₂ 
-    → Σ (All (match-fT S Γ) Θ₁) λ fs1 → Σ (All (match-fT S Γ) Θ₂) λ fs2 →  Σ (Θ₁ ++ Θ₂ ≡ Θ) λ eq1 → Φ ≡ mapList (λ x → proj₂ x) Θ₁ × Ψ ≡ mapList (λ x → proj₂ x) Θ₂
-      × fs ≡ subst (λ x → All (match-fT S Γ) x) eq1 (All++ fs1 fs2)
-fsDist [] [] [] refl = [] , [] , [] , [] , refl , refl , refl , refl
-fsDist [] (A ∷ Ψ) (f ∷ fs) refl = [] , _ ∷ _ , [] , f ∷ fs , refl , refl , refl , refl
-fsDist (x ∷ Φ) Ψ (f ∷ fs) eq with fsDist Φ Ψ fs (proj₂ (inj∷ eq))
-fsDist (._ ∷ .(mapList (λ x → proj₂ x) Θ₁)) .(mapList (λ x → proj₂ x) Θ₂) (f ∷ fs) refl | Θ₁ , Θ₂ , fs1 , fs2 , refl , refl , refl , refl = 
-  _ ∷ Θ₁ , Θ₂ , f ∷ fs1 , fs2 , refl , refl , refl , refl
-
-fsDist-refl : {S : Irr} {Γ : Cxt}
-  → {Φ Ψ : List (Tag × Pos)}
-  → (fs : All (match-fT S Γ) Φ)
-  → (gs : All (match-fT S Γ) Ψ)
-  → fsDist (mapList (λ r → proj₂ r) Φ) (mapList (λ r → proj₂ r) Ψ) (All++ fs gs) refl ≡ (Φ , Ψ , fs , gs , refl , refl , refl , refl)
-fsDist-refl [] [] = refl
-fsDist-refl [] (g ∷ gs) = refl
-fsDist-refl (f ∷ fs) gs rewrite fsDist-refl fs gs = refl
-{-# REWRITE fsDist-refl #-}
-
-∧rT* : {S : Irr} {Γ : Cxt} {A : Fma}
-  → {Θ : List (Tag × Pos)} {Φ : List Pos}
-  → (fs : All (match-fT S Γ) Θ)
-  → (SF : SubFmas Φ A)
-  → (eq : Φ ≡ mapList (λ x → proj₂ x) Θ)
-  → (mapList (λ x → proj₁ x) Θ) ∣ S ∣ Γ ⊢riT A
-∧rT* fs (conj {Φ} {Ψ} SF1 SF2) eq with fsDist Φ Ψ fs eq
-∧rT* fs (conj {.(mapList (λ x → proj₂ x) Θ₁)} {.(mapList (λ x → proj₂ x) Θ₂)} SF1 SF2) refl | Θ₁ , Θ₂ , fs1 , fs2 , refl , refl , refl , refl = 
-  ∧rT (∧rT* fs1 SF1 refl) (∧rT* fs2 SF2 refl)
-∧rT* (f ∷ []) stop refl = f2riT f
-
 {-
 We can generalize operations to lists of sequents.
 -}

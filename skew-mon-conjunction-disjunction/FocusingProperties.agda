@@ -21,6 +21,64 @@ open import Focusing
 open import CheckFocus
 open import TagUntag
 
+fsDist-white : {S : Stp} {Γ : Cxt} {Θ : List Pos}
+  → (Θ₁ Θ₂ : List Pos) (fs : All (λ C → S ∣ Γ ⊢li C) Θ) (eq : Θ₁ ++ Θ₂ ≡ Θ)
+  → Σ (All (λ C → S ∣ Γ ⊢li C) Θ₁) λ fs1 → Σ (All (λ C → S ∣ Γ ⊢li C) Θ₂) λ fs2 → fs ≡ subst (λ x → All (λ C → S ∣ Γ ⊢li C) x) eq (All++ fs1 fs2)
+fsDist-white [] [] [] refl = [] , [] , refl
+fsDist-white [] .(_ ∷ _) (f ∷ fs) refl = [] , _ ∷ _ , refl
+fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ fs) eq with fsDist-white Θ₁ Θ₂ fs (proj₂ (inj∷ eq))
+fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ .(subst (All (_∣_⊢li_ _ _)) refl (All++ fs1 fs2))) refl | fs1 , fs2 , refl = f ∷ fs1 , fs2 , refl
+
+fsDist-white-refl : {S : Stp} {Γ : Cxt}
+  → {Φ Ψ : List Pos}
+  → (fs : All (λ C → S ∣ Γ ⊢li C) Φ)
+  → (gs : All (λ C → S ∣ Γ ⊢li C) Ψ)
+  → fsDist-white Φ Ψ (All++ fs gs) refl ≡ (fs , gs , refl)
+fsDist-white-refl [] [] = refl
+fsDist-white-refl [] (g ∷ gs) = refl
+fsDist-white-refl (f ∷ fs) gs rewrite fsDist-white-refl fs gs = refl
+{-# REWRITE fsDist-white-refl #-}
+
+∧r* : {S : Stp} {Γ : Cxt} {A : Fma}
+  → {Φ : List Pos} 
+  → (fs : All (λ C → S ∣ Γ ⊢li C) Φ)
+  → (SF : SubFmas Φ A)
+  → S ∣ Γ ⊢ri A
+∧r* fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
+... | fs1 , fs2 , refl = ∧r (∧r* fs1 SF1) (∧r* fs2 SF2)
+∧r* (f ∷ []) stop = li2ri f
+
+fsDist : {S : Irr} {Γ : Cxt} {Θ : List (Tag × Pos)}
+  → (Φ Ψ : List Pos) (fs : All (match-fT S Γ) Θ) (eq : Φ ++ Ψ ≡ mapList (λ x → proj₂ x) Θ)
+  → Σ (List (Tag × Pos)) λ Θ₁ → Σ (List (Tag × Pos)) λ Θ₂ 
+    → Σ (All (match-fT S Γ) Θ₁) λ fs1 → Σ (All (match-fT S Γ) Θ₂) λ fs2 →  Σ (Θ₁ ++ Θ₂ ≡ Θ) λ eq1 → Φ ≡ mapList (λ x → proj₂ x) Θ₁ × Ψ ≡ mapList (λ x → proj₂ x) Θ₂
+      × fs ≡ subst (λ x → All (match-fT S Γ) x) eq1 (All++ fs1 fs2)
+fsDist [] [] [] refl = [] , [] , [] , [] , refl , refl , refl , refl
+fsDist [] (A ∷ Ψ) (f ∷ fs) refl = [] , _ ∷ _ , [] , f ∷ fs , refl , refl , refl , refl
+fsDist (x ∷ Φ) Ψ (f ∷ fs) eq with fsDist Φ Ψ fs (proj₂ (inj∷ eq))
+fsDist (._ ∷ .(mapList (λ x → proj₂ x) Θ₁)) .(mapList (λ x → proj₂ x) Θ₂) (f ∷ fs) refl | Θ₁ , Θ₂ , fs1 , fs2 , refl , refl , refl , refl = 
+  _ ∷ Θ₁ , Θ₂ , f ∷ fs1 , fs2 , refl , refl , refl , refl
+
+fsDist-refl : {S : Irr} {Γ : Cxt}
+  → {Φ Ψ : List (Tag × Pos)}
+  → (fs : All (match-fT S Γ) Φ)
+  → (gs : All (match-fT S Γ) Ψ)
+  → fsDist (mapList (λ r → proj₂ r) Φ) (mapList (λ r → proj₂ r) Ψ) (All++ fs gs) refl ≡ (Φ , Ψ , fs , gs , refl , refl , refl , refl)
+fsDist-refl [] [] = refl
+fsDist-refl [] (g ∷ gs) = refl
+fsDist-refl (f ∷ fs) gs rewrite fsDist-refl fs gs = refl
+{-# REWRITE fsDist-refl #-}
+
+∧rT* : {S : Irr} {Γ : Cxt} {A : Fma}
+  → {Θ : List (Tag × Pos)} {Φ : List Pos}
+  → (fs : All (match-fT S Γ) Θ)
+  → (SF : SubFmas Φ A)
+  → (eq : Φ ≡ mapList (λ x → proj₂ x) Θ)
+  → (mapList (λ x → proj₁ x) Θ) ∣ S ∣ Γ ⊢riT A
+∧rT* fs (conj {Φ} {Ψ} SF1 SF2) eq with fsDist Φ Ψ fs eq
+∧rT* fs (conj {.(mapList (λ x → proj₂ x) Θ₁)} {.(mapList (λ x → proj₂ x) Θ₂)} SF1 SF2) refl | Θ₁ , Θ₂ , fs1 , fs2 , refl , refl , refl , refl = 
+  ∧rT (∧rT* fs1 SF1 refl) (∧rT* fs2 SF2 refl)
+∧rT* (f ∷ []) stop refl = f2riT f
 
 gen⊗r-li : {S : Stp} {Γ Δ : Cxt} {A B : Fma} {C : Pos}
   → {Φ : List Pos}
@@ -71,33 +129,6 @@ gen∨r₂-li (f2li {S = S} f) fs SF with check-focus {S = S} (f2li f) fs
 ... | inj₂ (.(proj₁ (tagF-fs (f2li f ∷ fs))) , .(subst (All (match-fT S _)) refl (proj₂ (tagF-fs (f2li f ∷ fs)))) , refl , refl , ok) = 
   f2li (∨r₂ (mapList proj₁ (proj₁ (tagF-fs (f2li f ∷ fs)))) ok (∧rT* (proj₂ (tagF-fs (f2li f ∷ fs))) SF refl))
 
-fsDist-white : {S : Stp} {Γ : Cxt} {Θ : List Pos}
-  → (Θ₁ Θ₂ : List Pos) (fs : All (λ C → S ∣ Γ ⊢li C) Θ) (eq : Θ₁ ++ Θ₂ ≡ Θ)
-  → Σ (All (λ C → S ∣ Γ ⊢li C) Θ₁) λ fs1 → Σ (All (λ C → S ∣ Γ ⊢li C) Θ₂) λ fs2 → fs ≡ subst (λ x → All (λ C → S ∣ Γ ⊢li C) x) eq (All++ fs1 fs2)
-fsDist-white [] [] [] refl = [] , [] , refl
-fsDist-white [] .(_ ∷ _) (f ∷ fs) refl = [] , _ ∷ _ , refl
-fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ fs) eq with fsDist-white Θ₁ Θ₂ fs (proj₂ (inj∷ eq))
-fsDist-white (x ∷ Θ₁) Θ₂ (f ∷ .(subst (All (_∣_⊢li_ _ _)) refl (All++ fs1 fs2))) refl | fs1 , fs2 , refl = f ∷ fs1 , fs2 , refl
-
-fsDist-white-refl : {S : Stp} {Γ : Cxt}
-  → {Φ Ψ : List Pos}
-  → (fs : All (λ C → S ∣ Γ ⊢li C) Φ)
-  → (gs : All (λ C → S ∣ Γ ⊢li C) Ψ)
-  → fsDist-white Φ Ψ (All++ fs gs) refl ≡ (fs , gs , refl)
-fsDist-white-refl [] [] = refl
-fsDist-white-refl [] (g ∷ gs) = refl
-fsDist-white-refl (f ∷ fs) gs rewrite fsDist-white-refl fs gs = refl
-{-# REWRITE fsDist-white-refl #-}
-
-∧r* : {S : Stp} {Γ : Cxt} {A : Fma}
-  → {Φ : List Pos} 
-  → (fs : All (λ C → S ∣ Γ ⊢li C) Φ)
-  → (SF : SubFmas Φ A)
-  → S ∣ Γ ⊢ri A
-∧r* fs (conj {Φ} {Ψ} SF1 SF2) with fsDist-white Φ Ψ fs refl
-... | fs1 , fs2 , refl = ∧r (∧r* fs1 SF1) (∧r* fs2 SF2)
-∧r* (f ∷ []) stop = li2ri f
-
 {-
 Phase ri is invertible. 
  -}
@@ -121,6 +152,18 @@ f2fs-refl fs (conj {Φ} {Ψ} SF1 SF2) eq with fsDist-white Φ Ψ fs eq
 f2fs-refl .(subst (All (_∣_⊢li_ _ _)) refl (All++ fs1 fs2)) (conj {Φ} {Ψ} SF1 SF2) refl | fs1 , fs2 , refl 
   rewrite f2fs-refl fs1 SF1 refl | f2fs-refl fs2 SF2 refl = refl
 f2fs-refl (f ∷ []) stop refl = refl
+
+{-
+Phase riT is also invertible.
+-}
+
+f2fsT : {l : List Tag} {S : Irr} {Γ : Cxt} {A : Fma}
+  → (f : l ∣ S ∣ Γ ⊢riT A)
+  → Σ (List (Tag × Pos)) λ Φ → Σ (All (match-fT S Γ) Φ) λ fs → Σ (List Pos) λ Ψ → Σ (Ψ ≡ mapList proj₂ Φ) λ eq1 → 
+    Σ (SubFmas Ψ A) λ SF → Σ (mapList proj₁ Φ ≡ l) λ eq2 → f ≡ subst (λ x → x ∣ S ∣ Γ ⊢riT A) eq2 (∧rT* fs SF eq1)
+f2fsT (∧rT f g) with f2fsT f | f2fsT g
+... | Φ1 , fs1 , .(mapList (λ r → proj₂ r) Φ1) , refl , SF1 , refl , refl | Φ2 , fs2 , .(mapList (λ r → proj₂ r) Φ2) , refl , SF2 , refl , refl = Φ1 ++ Φ2 , All++ fs1 fs2 , (mapList (λ r → proj₂ r) Φ1) ++ (mapList (λ r → proj₂ r) Φ2) , refl , conj SF1 SF2 , refl , refl
+f2fsT (f2riT {t} {C = C} f) = (t , C) ∷ [] , f ∷ [] , C ∷ [] , refl , stop , refl , refl
 
 {-
 All rules are admissible in phase ri.

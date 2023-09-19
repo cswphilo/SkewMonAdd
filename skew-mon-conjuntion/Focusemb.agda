@@ -25,28 +25,6 @@ i.e. running the noralization algorithm on a focused derivation would
 obtain a syntactically identical derivation, i.e. focus (emb-ri f) ≡ f
 -}
 
-fT2f : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
-  → (f : t ∣ S ∣ Γ ⊢fT C)
-  → S ∣ Γ ⊢f C
-fT2f ax = ax
-fT2f Ir = Ir
-fT2f (passT f) = pass f
-fT2f (⊗rT l ok refl f g) = ⊗r l ok refl f g
-fT2f (∧l₁T f) = ∧l₁ f
-fT2f (∧l₂T f) = ∧l₂ f
-
--- pT2p : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
---   → (f : t ∣ S ∣ Γ ⊢fT C)
---   → S ∣ Γ ⊢p C
--- pT2p (passT f) = pass f
--- pT2p (f) = (fT2f f)
-
-riT2ri : {l : List Tag} {S : Irr} {Γ : Cxt} {C : Fma}
-  → (f : l ∣ S ∣ Γ ⊢riT C)
-  → irr S ∣ Γ ⊢ri C
-riT2ri (∧rT f g) = ∧r (riT2ri f) (riT2ri g)
-riT2ri (f2riT f) = li2ri (f2li (fT2f f))
-
 fsDist-refl : (S : Irr) (Γ : Cxt) {s t : Tag} {A B : Pos}
   → {f : s ∣ S ∣ Γ ⊢fT A} {g : t ∣ S ∣ Γ ⊢fT B}
   → (fs : List (Σ Tag (λ t → Σ (Σ Fma isPos) (_∣_∣_⊢fT_ t S Γ))))
@@ -349,51 +327,6 @@ mutual
             focusemb-ri g = refl
   focusemb-∧rT* ((.C₁ , C , (∧l₁T f)) ∷ []) stop refl refl = trans (cong ∧l₁-ri (focusemb-li f)) refl
   focusemb-∧rT* ((.C₂ , C , (∧l₂T f)) ∷ []) stop refl refl = trans (cong ∧l₂-ri (focusemb-li f)) refl
-
-  focusemb-fT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
-    → (f : t ∣ S ∣ Γ ⊢fT C)
-    → focus (emb-fT f) ≡ li2ri (f2li (fT2f f))
-  focusemb-fT ax = refl
-  focusemb-fT Ir = refl
-  focusemb-fT (passT f) = cong pass-ri (focusemb-li f)
-  focusemb-fT {S = S} (⊗rT l ok refl f g)with f2fsT f
-  ... | (.P , C , passT f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((P , C , passT f) ∷ fs)) , refl , refl , SF , refl 
-    rewrite focusemb-∧rT*  ((P , C , passT f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (pass f)) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok (passT f) fs ok |
-            focusemb-ri g = refl
-  focusemb-fT {S = .(just (` X) , tt)} (⊗rT .(mapList proj₁ ((R , (` X , tt) , ax) ∷ fs)) ok refl .(∧rT* ((R , (` X , tt) , ax) ∷ fs) SF refl refl) g) | (.R , .(` X , tt) , (ax {X = X})) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (` X , tt) , ax) ∷ fs)) , refl , refl , SF , refl 
-    rewrite focusemb-∧rT*  ((R , (` X , _) , ax) ∷ fs) SF refl refl |
-            f2fs-refl (((` X , tt) , f2li ax) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok ax fs tt |
-            focusemb-ri g = refl
-  focusemb-fT {S = .(- , tt)} (⊗rT .(mapList proj₁ ((R , (I , tt) , Ir) ∷ fs)) ok refl .(∧rT* ((R , (I , tt) , Ir) ∷ fs) SF refl refl) g) | (.R , .(I , tt) , Ir) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (I , tt) , Ir) ∷ fs)) , refl , refl , SF , refl 
-    rewrite focusemb-∧rT*  ((R , (I , _) , Ir) ∷ fs) SF refl refl |
-            f2fs-refl (((I , tt) , f2li Ir) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok Ir fs tt |
-            focusemb-ri g = refl
-  focusemb-fT {S = S} (⊗rT .(mapList proj₁ ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g) | (.R , .(A ⊗ B , tt) , (⊗rT l {Γ = []} {A = A} {B} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl
-    rewrite focusemb-∧rT*  ((R , (A ⊗ B , _) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (((A ⊗ B , tt) , f2li (⊗r l ok₁ refl f g₁)) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs tt |
-            focusemb-ri g = refl
-  focusemb-fT {S = S} (⊗rT .(mapList proj₁ ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) ok refl .(∧rT* ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl) g) | (.R , .(A ⊗ B , tt) , (⊗rT l {Γ = x ∷ Γ} {A = A} {B} ok₁ refl f g₁)) ∷ fs , .(mapList (λ x₁ → proj₁ (proj₁ (proj₂ x₁))) ((R , (A ⊗ B , tt) , (⊗rT l ok₁ refl f g₁)) ∷ fs)) , refl , refl , SF , refl
-    rewrite focusemb-∧rT*  ((R , (A ⊗ B , _) , (⊗rT l ok₁ refl f g₁)) ∷ fs) SF refl refl |
-            f2fs-refl (((A ⊗ B , tt) , f2li (⊗r l ok₁ refl f g₁)) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok ((⊗rT l ok₁ refl f g₁)) fs tt |
-            focusemb-ri g = refl
-  focusemb-fT {S = .(just (_ ∧ _) , tt)} (⊗rT .(mapList proj₁ ((C₁ , C , ∧l₁T f) ∷ fs)) ok refl .(∧rT* ((C₁ , C , ∧l₁T f) ∷ fs) SF refl refl) g) | (.C₁ , C , ∧l₁T {B = B} f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₁ , C , ∧l₁T f) ∷ fs)) , refl , refl , SF , refl 
-    rewrite focusemb-∧rT*  ((C₁ , C , ∧l₁T {B = B} f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (∧l₁ f)) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok (∧l₁T {B = B} f) fs ok |
-            focusemb-ri g = refl
-  focusemb-fT {S = .(just (_ ∧ _) , tt)} (⊗rT .(mapList proj₁ ((C₂ , C , ∧l₂T f) ∷ fs)) ok refl .(∧rT* ((C₂ , C , ∧l₂T f) ∷ fs) SF refl refl) g) | (.C₂ , C , ∧l₂T {A = A} f) ∷ fs , .(mapList (λ x → proj₁ (proj₁ (proj₂ x))) ((C₂ , C , ∧l₂T f) ∷ fs)) , refl , refl , SF , refl 
-    rewrite focusemb-∧rT*  ((C₂ , C , ∧l₂T {A = A} f) ∷ fs) SF refl refl |
-            f2fs-refl ((C , f2li (∧l₂ f)) ∷ mapList emb-fT-untagF fs) SF refl |
-            check-focus-ok (∧l₂T {A = A} f) fs ok |
-            focusemb-ri g  = refl
-  focusemb-fT (∧l₁T f) = cong ∧l₁-ri (focusemb-li f)
-  focusemb-fT (∧l₂T f) = cong ∧l₂-ri (focusemb-li f)
   
   focusemb-f : {S : Irr} {Γ : Cxt} {C : Pos}
     → (f : S ∣ Γ ⊢f C)
@@ -440,17 +373,6 @@ mutual
   focusemb-f (∧l₁ f) = cong ∧l₁-ri (focusemb-li f)
   focusemb-f (∧l₂ f) = cong ∧l₂-ri (focusemb-li f)
   
-  -- focusemb-fT : {t : Tag} {S : Irr} {Γ : Cxt} {C : Pos}
-  --   → (f : t ∣ S ∣ Γ ⊢fT C)
-  --   → focus (emb-fT f) ≡ li2ri (f2li (pT2p f))
-  -- focusemb-fT (passT f) = cong pass-ri (focusemb-li f)
-  -- focusemb-fT (f) = focusemb-fT f
-
-  -- focusemb-p : {S : Irr} {Γ : Cxt} {C : Pos}
-  --   → (f : S ∣ Γ ⊢p C)
-  --   → focus (emb-p f) ≡ li2ri (f2li f)
-  -- focusemb-p (pass f) = cong pass-ri (focusemb-li f)
-  -- focusemb-p (f) = focusemb-f f
   
   focusemb-li : {S : Stp} {Γ : Cxt} {C : Pos}
     → (f : S ∣ Γ ⊢li C)
@@ -458,12 +380,6 @@ mutual
   focusemb-li (⊗l f) = cong ⊗l-ri (focusemb-li f)
   focusemb-li (Il f) = cong Il-ri (focusemb-li f)
   focusemb-li (f2li f) = focusemb-f f
-  
-  focusemb-riT : {l : List Tag} {S : Irr} {Γ : Cxt} {C : Fma}
-    → (f : l ∣ S ∣ Γ ⊢riT C)
-    → focus (emb-riT f) ≡ riT2ri f
-  focusemb-riT (∧rT f g) = cong₂ ∧r (focusemb-riT f) (focusemb-riT g)
-  focusemb-riT (f2riT f) = focusemb-fT f
 
   focusemb-ri : {S : Stp} {Γ : Cxt} {C : Fma}
     → (f : S ∣ Γ ⊢ri C)
